@@ -1,0 +1,67 @@
+[workspace]
+resolver = "2"
+members = ["crates/design", "crates/domain", "crates/renderer"]
+# `web` only makes sense for wasm32; plain `cargo build/test` skips it.
+default-members = ["crates/design", "crates/domain", "crates/renderer"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+publish = false
+rust-version = "1.90"
+
+# Versions verified against crates.io on 2026-11-11 (see docs/VERSIONS.md).
+[workspace.dependencies]
+design = { path = "crates/design" }
+domain = { path = "crates/domain" }
+renderer = { path = "crates/renderer" }
+storage = { path = "crates/storage" }
+providers = { path = "crates/providers" }
+db = { path = "crates/db" }
+
+anyhow = "1"
+thiserror = "2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde", "std"] }
+tokio = { version = "1.54", features = ["rt-multi-thread", "macros", "signal", "time", "sync", "net", "fs"] }
+async-trait = "0.1"
+tracing = "0.1.44"
+bytes = "1"
+proptest = "1.12"
+
+[profile.release]
+strip = true
+
+# Size-optimised profile used by trunk for the WASM bundles.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# Rendering is very slow unoptimised; keep tests fast.
+[profile.dev.package.tiny-skia]
+opt-level = 3
+[profile.dev.package.tiny-skia-path]
+opt-level = 3
+[profile.dev.package.resvg]
+opt-level = 3
+[profile.dev.package.png]
+opt-level = 3
+[profile.dev.package.image]
+opt-level = 3
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+[profile.dev.package.fdeflate]
+opt-level = 3
+[profile.dev.package.zune-jpeg]
+opt-level = 3
+[profile.dev.package.fast_image_resize]
+opt-level = 3
+[profile.dev.package.argon2]
+opt-level = 3

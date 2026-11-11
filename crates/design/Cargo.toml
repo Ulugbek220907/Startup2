@@ -1,0 +1,20 @@
+[package]
+name = "design"
+description = "Versioned design document shared by the browser editor and the server renderer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Compiles the print fonts into the binary (server, tests). The browser
+# fetches them lazily instead, to keep the initial WASM payload small.
+embed-fonts = []
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+ttf-parser = { version = "0.25", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+proptest.workspace = true

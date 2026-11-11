@@ -1,0 +1,15 @@
+[package]
+name = "domain"
+description = "Business rules shared by server, bot and web: money, phones, pricing, order states, i18n, API types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+design.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
