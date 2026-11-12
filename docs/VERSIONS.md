@@ -16,7 +16,9 @@ Checked on 2026-11-11/12. "Verified" says how the version was confirmed.
 | resvg / usvg / tiny-skia | 0.49 / 0.49 / 0.12 | crates.io API; golden-image tests |
 | image | 0.25.10 | crates.io API; tested |
 | fast_image_resize | 6.1 | crates.io API; tested via golden images |
-| object_store | 0.14 | crates.io API; compiled. S3 path tested only if you run the compose stack |
+| object_store | 0.14 | crates.io API; S3 path exercised against MinIO in the compose stack |
+| MinIO (development only) | `cgr.dev/chainguard/minio:latest` (RELEASE.2026-11-10) | pulled and run in the compose stack; the tag floats, pin a digest if you need reproducibility |
+| Caddy (production) | `caddy:2-alpine` | **not run here** |
 | testcontainers | 0.28.0 | crates.io API; integration tests run with it |
 | ttf-parser | 0.25 | crates.io API; tested |
 | wasm-bindgen (+ CLI) | 0.2.130 | crates.io API; used for the build |

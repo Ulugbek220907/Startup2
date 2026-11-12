@@ -50,6 +50,12 @@ First complete version of the v1 scope.
 - The font is Montserrat instead of Plus Jakarta Sans: the latter has no
   Cyrillic in its open-source release.
 
+### Notes
+- The development compose file uses the Chainguard build of MinIO
+  (`cgr.dev/chainguard/minio`): MinIO's own `minio/minio` image is no longer
+  on Docker Hub. The bucket is created by making its folder, so the `mc`
+  client is not needed.
+
 ### Known gaps (details in README "Status" and the ADRs)
 - Live try-on has not been run on a physical phone; the 20 fps target is
   untested, and first model load on 4G is about 8-15 s (target was 5 s).

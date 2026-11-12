@@ -71,6 +71,9 @@ Built and verified here:
   loads, the pose is found and the garment is warped onto the body.
 - First-visit payload: about 400 KB gzipped (budget 600 KB, enforced by the
   build script).
+- The Docker image (203 MB, non-root user, built-in healthcheck) and the
+  compose stack with PostgreSQL and S3 storage (MinIO): the browser test
+  passes against the containers. See the caveat in the table below.
 - `cargo fmt`, `clippy -D warnings` and `cargo deny` are clean.
 
 **Not verified. Please read before relying on any of it:**
@@ -84,8 +87,7 @@ Built and verified here:
 | Android and iOS builds | Projects generated and configured, never compiled (no Android SDK or Xcode here). |
 | GitHub Actions workflows | Written, YAML-valid, **never run**. Action versions could not be checked from the build environment. See `docs/VERSIONS.md`. |
 | Signed store builds from a tag | Depends on the two rows above plus your keystore and Apple account. Expect fixes on first run. |
-| `docker compose up` | See [CHANGELOG](CHANGELOG.md) for what was actually exercised. |
-| S3 storage backend | Unit-tested through the trait with the in-memory and filesystem stores; the S3 path runs only in the compose stack. |
+| `docker compose up --build` exactly as written | The image was built from this Dockerfile and the compose stack (app + PostgreSQL + MinIO) was started and passed the browser test, **but** the build environment's network proxy required a temporary Dockerfile variant that trusts its certificate, and the image was built separately and then started with `--no-build`. The unmodified one-command path has not been run on a normal machine. |
 | Image moderation | No real provider. Text blocklist + manual review; see ADR 0011. |
 | Uzbek and Russian wording | Written by the developer tooling, not reviewed by a native speaker. Have the translation files read before launch. |
 | Legal text | None of the wording is legal advice. See `docs/PRIVACY.md`. |
