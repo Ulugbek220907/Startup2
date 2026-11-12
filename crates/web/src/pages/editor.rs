@@ -1206,9 +1206,30 @@ fn LayerPanel(ed: Ed, layer: Memo<Option<Layer>>) -> impl IntoView {
                         })/>
                     }
                 })}
+            <label class="field">
+                <span>{move || t("editor.text_size")}</span>
+                // Same value the yellow corner handle changes; a slider is
+                // easier to hit precisely with a thumb.
+                <input
+                    class="range"
+                    type="range"
+                    min="0.2"
+                    max="4"
+                    step="0.05"
+                    prop:value=move || layer.with(|l| l.as_ref().map(|l| l.scale.to_string()).unwrap_or_default())
+                    on:input=move |ev| {
+                        let v: f32 = event_target_value(&ev).parse().unwrap_or(1.0);
+                        ed.mutate_selected(|l| l.scale = v.clamp(0.05, 30.0));
+                    }
+                    on:change=move |_| ed.commit()
+                />
+            </label>
             <div class="actions">
                 <button class="icon-btn" aria-label=move || t("editor.center") on:click=center>{icons::center()}</button>
                 <button class="icon-btn" aria-label=move || t("editor.flip_h") on:click=move |_| apply(Box::new(|l| l.flip_x = !l.flip_x))>{icons::flip()}</button>
+                <button class="icon-btn" style="transform:rotate(90deg)" aria-label=move || t("editor.flip_v") on:click=move |_| apply(Box::new(|l| l.flip_y = !l.flip_y))>
+                    {icons::flip()}
+                </button>
                 <button class="icon-btn" aria-label=move || t("editor.to_front") on:click=move |_| reorder(true)>{icons::up()}</button>
                 <button class="icon-btn" aria-label=move || t("editor.to_back") on:click=move |_| reorder(false)>{icons::down()}</button>
                 <button class="icon-btn" aria-label=move || t("editor.duplicate") on:click=duplicate>{icons::copy()}</button>

@@ -43,6 +43,9 @@ if photos must not leave the country. It fits behind the same
   measurements. `crates/evalkit` exists to measure them on your photos.
 
 ## Controls implemented around any provider
-Consent before upload; per-device and global daily limits; a daily cost
+Consent before upload; resolution and brightness checks on the server;
+the "exactly one person, torso visible" check on the device (it needs the
+pose model, and running it there keeps rejected photos off the server; a
+client that skips it only wastes its own daily quota); per-device and global daily limits; a daily cost
 cap that counts queued jobs at full price; result caching for identical
 photo + design; automatic deletion after `TRYON_TTL_HOURS`; "delete now".
