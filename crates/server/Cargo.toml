@@ -39,10 +39,13 @@ hmac = "0.13"
 sha2 = "0.11"
 hex = "0.4"
 image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }
-teloxide = { version = "0.17.0", default-features = false, features = ["macros", "rustls", "ctrlc_handler"] }
+teloxide = { version = "0.17.0", default-features = false, features = ["rustls"] }
 percent-encoding = "2"
+base64 = "0.23"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }
 http-body-util = "0.1"
 testcontainers = "0.28.0"
+png = "0.18"
+async-trait.workspace = true

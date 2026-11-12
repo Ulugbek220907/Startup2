@@ -48,3 +48,4 @@ pub fn ts(t: DateTime<Utc>) -> String {
 pub fn is_unique_violation(e: &sqlx::Error) -> bool {
     matches!(e, sqlx::Error::Database(d) if d.code().as_deref() == Some("23505"))
 }
+pub use sqlx;
