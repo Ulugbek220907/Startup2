@@ -1,7 +1,12 @@
 name: Deploy
 
-# Builds the server image, pushes it to the GitHub Container Registry and
-# rolls it out on the VPS. Runs on version tags, or manually.
+# For the single-VPS setup (docs/DEPLOY.md). Builds the server image, pushes
+# it to the GitHub Container Registry and rolls it out on the VPS.
+#
+# It only runs when the repository variable DEPLOY_TARGET is set to "vps"
+# (Settings -> Secrets and variables -> Actions -> Variables). If you host
+# on Render, leave it unset: Render builds and deploys by itself on every
+# push (docs/RENDER.md).
 on:
   push:
     tags: ["v*.*.*"]
@@ -18,6 +23,7 @@ permissions:
 
 jobs:
   image:
+    if: vars.DEPLOY_TARGET == 'vps'
     runs-on: ubuntu-24.04
     outputs:
       image: ${{ steps.ref.outputs.image }}

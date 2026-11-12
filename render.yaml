@@ -1,0 +1,78 @@
+# Render Blueprint: one web service (the whole app) + managed PostgreSQL.
+#
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repository.
+# Full guide, costs and caveats: docs/RENDER.md
+#
+# The server reads PORT and RENDER_EXTERNAL_URL (both set by Render), so
+# neither BIND_ADDR nor PUBLIC_BASE_URL is needed until you add your own
+# domain.
+
+services:
+  - type: web
+    name: qiyiqdoppi
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Frankfurt is the closest Render region to Uzbekistan. The region
+    # cannot be changed after the service is created.
+    region: frankfurt
+    # 1 CPU / 2 GB. A 300-DPI print render needs a few hundred MB of memory
+    # at its peak, which is too tight for the 512 MB plan. See docs/RENDER.md
+    # before choosing a smaller one. A persistent disk requires a paid plan.
+    plan: 1c-2g
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    # Uploaded artwork, print files and try-on photos. Everything outside
+    # this folder is wiped on every deploy and restart.
+    disk:
+      name: qiyiqdoppi-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: qiyiqdoppi-db
+          property: connectionString
+      # Passed to the Docker build: run the container as root so it can
+      # write to the disk, which Render mounts owned by root. Remove this
+      # line to run as the unprivileged user if the disk turns out to be
+      # writable for it (check /readyz after deploying).
+      - key: RUN_AS
+        value: root
+      - key: STORAGE_BACKEND
+        value: fs
+      - key: STORAGE_FS_DIR
+        value: /data/storage
+      - key: ADMIN_USERNAME
+        value: admin
+      # Generated once by Render; read it under the service's Environment tab.
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      # Render's proxy is the only way in, so its forwarding headers can be
+      # trusted for rate limiting.
+      - key: TRUST_PROXY
+        value: "true"
+      - key: CLIENT_IP_HEADER
+        value: cf-connecting-ip
+      # Origins of the Android and iOS app shells.
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://localhost,capacitor://localhost
+      - key: LOG_FORMAT
+        value: json
+      - key: WORKERS
+        value: "2"
+      # Mock integrations by default. Add real ones in the dashboard later
+      # (TRYON_PROVIDER, FASHN_API_KEY, TELEGRAM_BOT_TOKEN, ...): see
+      # .env.example for every variable.
+      - key: TRYON_PROVIDER
+        value: mock
+
+databases:
+  - name: qiyiqdoppi-db
+    region: frankfurt
+    # Smallest paid plan. The free plan is deleted after 30 days.
+    plan: 0.1c-256mb
+    # The version the app is tested against.
+    postgresMajorVersion: "16"
+    databaseName: qiyiq
+    user: qiyiq

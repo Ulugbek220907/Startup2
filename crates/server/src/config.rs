@@ -26,6 +26,9 @@ pub struct Config {
     pub cors_allowed_origins: Vec<String>,
     /// Trust `X-Forwarded-For` from the reverse proxy for client IPs.
     pub trust_proxy: bool,
+    /// With `trust_proxy`: read the client IP from this header first (for
+    /// hosts whose edge sets a dedicated header, e.g. `cf-connecting-ip`).
+    pub client_ip_header: Option<String>,
     pub max_upload_bytes: usize,
     pub allow_foil: bool,
     pub tryon: TryOnConfig,
@@ -111,7 +114,11 @@ impl Config {
             Tiyin::from_sum(v).map_err(|e| ConfigError::Invalid(k, e.to_string()))
         };
 
-        let public_base_url = get("PUBLIC_BASE_URL").unwrap_or_else(|| "http://localhost:8080".into()).trim_end_matches('/').to_string();
+        // Hosting platforms announce the public address themselves: Render
+        // sets RENDER_EXTERNAL_URL. An explicit PUBLIC_BASE_URL (for example
+        // your own domain) always wins.
+        let public_base_url =
+            get("PUBLIC_BASE_URL").or_else(|| get("RENDER_EXTERNAL_URL")).unwrap_or_else(|| "http://localhost:8080".into()).trim_end_matches('/').to_string();
         if !(public_base_url.starts_with("http://") || public_base_url.starts_with("https://")) {
             return Err(ConfigError::Invalid("PUBLIC_BASE_URL", "must start with http:// or https://".into()));
         }
@@ -172,13 +179,28 @@ impl Config {
             Some(v) => Lang::parse(&v).ok_or_else(|| ConfigError::Invalid("ADMIN_LANG", "use uz, ru or en".into()))?,
         };
 
+        // BIND_ADDR wins; otherwise listen on the platform's PORT (Render,
+        // and most container hosts, pass the port this way).
+        let bind_addr = match (get("BIND_ADDR"), get("PORT")) {
+            (Some(addr), _) => addr.parse().map_err(|e: std::net::AddrParseError| ConfigError::Invalid("BIND_ADDR", e.to_string()))?,
+            (None, Some(port)) => {
+                let port: u16 = port.parse().map_err(|_| ConfigError::Invalid("PORT", "must be a port number".into()))?;
+                SocketAddr::from(([0, 0, 0, 0], port))
+            }
+            (None, None) => SocketAddr::from(([0, 0, 0, 0], 8080)),
+        };
+        let client_ip_header = get("CLIENT_IP_HEADER").map(|h| h.to_ascii_lowercase());
+        if client_ip_header.as_deref().is_some_and(|h| h.is_empty() || !h.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')) {
+            return Err(ConfigError::Invalid("CLIENT_IP_HEADER", "must be a header name such as cf-connecting-ip".into()));
+        }
+
         let max_upload_mb: usize = parse("MAX_UPLOAD_MB", get("MAX_UPLOAD_MB"), 10)?;
         if !(1..=50).contains(&max_upload_mb) {
             return Err(ConfigError::Invalid("MAX_UPLOAD_MB", "must be between 1 and 50".into()));
         }
 
         Ok(Config {
-            bind_addr: parse("BIND_ADDR", get("BIND_ADDR"), SocketAddr::from(([0, 0, 0, 0], 8080)))?,
+            bind_addr,
             database_url: req("DATABASE_URL")?,
             db_max_connections: parse("DB_MAX_CONNECTIONS", get("DB_MAX_CONNECTIONS"), 10)?,
             cookie_secure: flag("COOKIE_SECURE", public_base_url.starts_with("https://"))?,
@@ -192,6 +214,7 @@ impl Config {
                 .map(|v| v.split(',').map(|s| s.trim().trim_end_matches('/').to_string()).filter(|s| !s.is_empty()).collect())
                 .unwrap_or_default(),
             trust_proxy: flag("TRUST_PROXY", false)?,
+            client_ip_header,
             max_upload_bytes: max_upload_mb * 1024 * 1024,
             allow_foil: flag("ALLOW_FOIL", false)?,
             tryon: TryOnConfig {
@@ -248,6 +271,30 @@ mod tests {
         let c = cfg(&[("DATABASE_URL", "x"), ("PUBLIC_BASE_URL", "https://example.uz/")]).unwrap();
         assert!(c.cookie_secure);
         assert_eq!(c.public_base_url, "https://example.uz");
+    }
+
+    #[test]
+    fn platform_port_and_url_are_picked_up() {
+        // Render-style environment: PORT and RENDER_EXTERNAL_URL, nothing else.
+        let c = cfg(&[("DATABASE_URL", "x"), ("PORT", "10000"), ("RENDER_EXTERNAL_URL", "https://qd.onrender.com")]).unwrap();
+        assert_eq!(c.bind_addr, SocketAddr::from(([0, 0, 0, 0], 10000)));
+        assert_eq!(c.public_base_url, "https://qd.onrender.com");
+        assert!(c.cookie_secure);
+        // Explicit settings win over the platform's.
+        let c = cfg(&[
+            ("DATABASE_URL", "x"),
+            ("PORT", "10000"),
+            ("BIND_ADDR", "127.0.0.1:9000"),
+            ("RENDER_EXTERNAL_URL", "https://qd.onrender.com"),
+            ("PUBLIC_BASE_URL", "https://qiyiqdoppi.uz"),
+            ("CLIENT_IP_HEADER", "CF-Connecting-IP"),
+        ])
+        .unwrap();
+        assert_eq!(c.bind_addr.port(), 9000);
+        assert_eq!(c.public_base_url, "https://qiyiqdoppi.uz");
+        assert_eq!(c.client_ip_header.as_deref(), Some("cf-connecting-ip"));
+        assert!(cfg(&[("DATABASE_URL", "x"), ("PORT", "http")]).is_err());
+        assert!(cfg(&[("DATABASE_URL", "x"), ("CLIENT_IP_HEADER", "bad header")]).is_err());
     }
 
     #[test]

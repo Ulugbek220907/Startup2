@@ -107,6 +107,19 @@ impl FromRequestParts<AppState> for ClientIp {
 
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         if state.cfg.trust_proxy {
+            // Some hosts put the real client address in a dedicated header
+            // that their edge always overwrites.
+            if let Some(name) = &state.cfg.client_ip_header {
+                let ip = parts
+                    .headers
+                    .get(name.as_str())
+                    .and_then(|v| v.to_str().ok())
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| s.parse::<std::net::IpAddr>().is_ok());
+                if let Some(ip) = ip {
+                    return Ok(ClientIp(ip));
+                }
+            }
             // The reverse proxy appends the address it saw, so the *last*
             // entry is the one we can trust; earlier ones are client-supplied.
             let forwarded = parts

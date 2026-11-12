@@ -11,7 +11,11 @@ use tracing_subscriber::EnvFilter;
 /// `/healthz`. Used by the Docker HEALTHCHECK, so the image needs no curl.
 fn healthcheck() -> ! {
     use std::io::{Read, Write};
-    let port = std::env::var("BIND_ADDR").ok().and_then(|a| a.rsplit(':').next().and_then(|p| p.parse::<u16>().ok())).unwrap_or(8080);
+    let port = std::env::var("BIND_ADDR")
+        .ok()
+        .and_then(|a| a.rsplit(':').next().and_then(|p| p.parse::<u16>().ok()))
+        .or_else(|| std::env::var("PORT").ok().and_then(|p| p.parse().ok()))
+        .unwrap_or(8080);
     let ok = std::net::TcpStream::connect(("127.0.0.1", port))
         .and_then(|mut s| {
             s.set_read_timeout(Some(Duration::from_secs(3)))?;
