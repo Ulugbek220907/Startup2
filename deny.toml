@@ -2,8 +2,22 @@
 #   cargo deny check advisories licenses bans sources
 
 [advisories]
-# Fail on any known vulnerability or unmaintained/yanked crate.
+# Fail on any known vulnerability or unmaintained/yanked crate, except the
+# ones listed below. Each is an "unmaintained" notice (not a vulnerability)
+# with no replacement available on 2026-11-12. Review this list whenever a
+# dependency is upgraded and delete entries that no longer apply.
 yanked = "deny"
+ignore = [
+    # ttf-parser (direct dependency): reads only the six fonts bundled with
+    # the app, never user-supplied files. Candidate replacement: skrifa.
+    { id = "RUSTSEC-2026-0192", reason = "parses only our own bundled fonts; replace with skrifa when convenient" },
+    # paste: build-time macro helper pulled in by Leptos.
+    { id = "RUSTSEC-2024-0436", reason = "transitive via leptos; compile-time only" },
+    # proc-macro-error2: build-time macro helper pulled in by teloxide.
+    { id = "RUSTSEC-2026-0173", reason = "transitive via teloxide; compile-time only" },
+    # astral-tokio-tar: used by testcontainers, tests only.
+    { id = "RUSTSEC-2026-0440", reason = "dev-dependency of the integration tests only" },
+]
 
 [licenses]
 # Licences the project accepts for its dependencies. All are permissive or
@@ -18,11 +32,10 @@ allow = [
     "Zlib",
     "0BSD",
     "Unicode-3.0",
-    "Unicode-DFS-2016",
     "MPL-2.0",
     "CDLA-Permissive-2.0",
-    "OpenSSL",
     "BSL-1.0",
+    "CC0-1.0",
 ]
 confidence-threshold = 0.9
 
