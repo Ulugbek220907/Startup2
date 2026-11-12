@@ -1,0 +1,3 @@
+# Wide lines keep SQL strings and view markup readable.
+max_width = 160
+use_small_heuristics = "Max"

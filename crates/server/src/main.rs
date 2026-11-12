@@ -62,9 +62,7 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!(addr = %bind_addr, "listening");
     // `into_make_service_with_connect_info` exposes the peer address to
     // handlers (used for rate limiting).
-    axum::serve(listener, server::build_app(state).into_make_service_with_connect_info::<SocketAddr>())
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    axum::serve(listener, server::build_app(state).into_make_service_with_connect_info::<SocketAddr>()).with_graceful_shutdown(shutdown_signal()).await?;
     tracing::info!("stopped");
     Ok(())
 }

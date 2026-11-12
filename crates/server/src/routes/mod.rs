@@ -42,10 +42,7 @@ pub fn public_order(row: &db::orders::OrderRow, log: &[db::orders::StatusLogRow]
         quantity: row.quantity as u32,
         delivery_method: DeliveryMethod::parse(&row.delivery_method).unwrap_or(DeliveryMethod::Pickup),
         quote: parse_quote(&row.quote)?,
-        timeline: log
-            .iter()
-            .filter_map(|l| Some(StatusEventDto { status: OrderStatus::parse(&l.to_status)?, at: db::ts(l.created_at) }))
-            .collect(),
+        timeline: log.iter().filter_map(|l| Some(StatusEventDto { status: OrderStatus::parse(&l.to_status)?, at: db::ts(l.created_at) })).collect(),
     })
 }
 

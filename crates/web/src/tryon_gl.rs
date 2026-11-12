@@ -137,12 +137,7 @@ impl Renderer {
         for (k, v) in [("preserveDrawingBuffer", true), ("alpha", false), ("antialias", false), ("premultipliedAlpha", true)] {
             let _ = js_sys::Reflect::set(&opts, &JsValue::from_str(k), &JsValue::from_bool(v));
         }
-        let gl: Gl = canvas
-            .get_context_with_context_options("webgl", &opts)
-            .ok()
-            .flatten()
-            .and_then(|c| c.dyn_into().ok())
-            .ok_or("WebGL is not available")?;
+        let gl: Gl = canvas.get_context_with_context_options("webgl", &opts).ok().flatten().and_then(|c| c.dyn_into().ok()).ok_or("WebGL is not available")?;
         let buffer = |gl: &Gl| gl.create_buffer().ok_or("cannot create buffer");
         Ok(Renderer {
             tex_prog: link(&gl, FS_TEXTURE)?,

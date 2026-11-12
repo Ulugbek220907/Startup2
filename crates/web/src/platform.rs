@@ -50,6 +50,8 @@ extern "C" {
     /// Number of people found in the frame (0 or 1).
     #[wasm_bindgen(js_name = poseDetect)]
     pub fn pose_detect(video: &HtmlVideoElement, timestamp_ms: f64) -> u32;
+    #[wasm_bindgen(js_name = poseWantMask)]
+    pub fn pose_want_mask(on: bool);
     /// 33 x (x, y, visibility), normalised to the frame.
     #[wasm_bindgen(js_name = poseLandmarks)]
     pub fn pose_landmarks() -> Float32Array;

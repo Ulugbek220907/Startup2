@@ -49,9 +49,7 @@ fn size(v: f32, what: &str) -> Result<(), ValidationError> {
 }
 
 fn slug(s: &str, what: &str) -> Result<(), ValidationError> {
-    let ok = !s.is_empty()
-        && s.len() <= MAX_SLUG_LEN
-        && s.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'_');
+    let ok = !s.is_empty() && s.len() <= MAX_SLUG_LEN && s.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-' || b == b'_');
     if ok {
         Ok(())
     } else {

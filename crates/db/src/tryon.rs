@@ -74,9 +74,7 @@ pub async fn find_cached(pool: &PgPool, cache_key: &str, device_id: &str) -> Res
 
 /// Mark as running; false if the job was deleted or already handled.
 pub async fn set_running(pool: &PgPool, id: Uuid) -> Result<bool> {
-    let r = sqlx::query!("UPDATE tryon_jobs SET status = 'running' WHERE id = $1 AND status IN ('queued', 'running')", id)
-        .execute(pool)
-        .await?;
+    let r = sqlx::query!("UPDATE tryon_jobs SET status = 'running' WHERE id = $1 AND status IN ('queued', 'running')", id).execute(pool).await?;
     Ok(r.rows_affected() == 1)
 }
 
@@ -97,13 +95,9 @@ pub async fn set_done(pool: &PgPool, id: Uuid, result_key: &str, mime: &str, cos
 }
 
 pub async fn set_failed(pool: &PgPool, id: Uuid, error: &str) -> Result<()> {
-    sqlx::query!(
-        "UPDATE tryon_jobs SET status = 'failed', error = $2, finished_at = now() WHERE id = $1 AND status IN ('queued', 'running')",
-        id,
-        error
-    )
-    .execute(pool)
-    .await?;
+    sqlx::query!("UPDATE tryon_jobs SET status = 'failed', error = $2, finished_at = now() WHERE id = $1 AND status IN ('queued', 'running')", id, error)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
@@ -124,19 +118,14 @@ pub async fn mark_deleted(pool: &PgPool, id: Uuid) -> Result<Vec<String>> {
 
 /// Ids of jobs past their TTL that still hold files.
 pub async fn expired(pool: &PgPool, limit: i64) -> Result<Vec<Uuid>> {
-    sqlx::query_scalar!("SELECT id FROM tryon_jobs WHERE status <> 'deleted' AND expires_at <= now() ORDER BY expires_at LIMIT $1", limit)
-        .fetch_all(pool)
-        .await
+    sqlx::query_scalar!("SELECT id FROM tryon_jobs WHERE status <> 'deleted' AND expires_at <= now() ORDER BY expires_at LIMIT $1", limit).fetch_all(pool).await
 }
 
 /// Jobs started by a device in the last 24 hours.
 pub async fn count_recent_for_device(pool: &PgPool, device_id: &str) -> Result<i64> {
-    sqlx::query_scalar!(
-        r#"SELECT count(*) AS "n!" FROM tryon_jobs WHERE device_id = $1 AND created_at > now() - interval '24 hours'"#,
-        device_id
-    )
-    .fetch_one(pool)
-    .await
+    sqlx::query_scalar!(r#"SELECT count(*) AS "n!" FROM tryon_jobs WHERE device_id = $1 AND created_at > now() - interval '24 hours'"#, device_id)
+        .fetch_one(pool)
+        .await
 }
 
 /// Number of jobs and money spent on generation since midnight UTC, for the

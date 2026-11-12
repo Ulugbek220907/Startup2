@@ -34,12 +34,7 @@ impl TemplateDef {
 }
 
 fn text(x: f32, y: f32, s: &str, font: FontId, size: f32, color: Color, curve: f32) -> Layer {
-    Layer::new(
-        "",
-        x,
-        y,
-        LayerKind::Text(TextLayer { text: s.into(), font, size_cm: size, color, outline: None, curve, align: Align::Center }),
-    )
+    Layer::new("", x, y, LayerKind::Text(TextLayer { text: s.into(), font, size_cm: size, color, outline: None, curve, align: Align::Center }))
 }
 
 fn city_arch(w: f32, h: f32, ink: Color) -> Vec<Layer> {
@@ -54,10 +49,7 @@ fn city_arch(w: f32, h: f32, ink: Color) -> Vec<Layer> {
 
 fn team_number(w: f32, h: f32, ink: Color) -> Vec<Layer> {
     let cx = w / 2.0;
-    vec![
-        text(cx, h * 0.14, "JAMOA", FontId::RubikMono, w * 0.11, ink, 0.0),
-        text(cx, h * 0.42, "10", FontId::Oswald, w * 0.6, ink, 0.0),
-    ]
+    vec![text(cx, h * 0.14, "JAMOA", FontId::RubikMono, w * 0.11, ink, 0.0), text(cx, h * 0.42, "10", FontId::Oswald, w * 0.6, ink, 0.0)]
 }
 
 fn badge(w: f32, h: f32, ink: Color) -> Vec<Layer> {
@@ -104,12 +96,7 @@ mod tests {
                 for l in &layers {
                     let b = layer_bbox(l, &EmbeddedFonts);
                     let inside = b.intersect(&area);
-                    assert!(
-                        (inside.w * inside.h) / (b.w * b.h) > 0.999,
-                        "template {} layer {} leaves the {w}x{h} area: {b:?}",
-                        t.id,
-                        l.id
-                    );
+                    assert!((inside.w * inside.h) / (b.w * b.h) > 0.999, "template {} layer {} leaves the {w}x{h} area: {b:?}", t.id, l.id);
                 }
             }
         }

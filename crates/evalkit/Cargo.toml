@@ -1,0 +1,22 @@
+[package]
+name = "evalkit"
+description = "Evaluation harness for photo try-on providers: latency, cost and a manual quality checklist"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "tryon-eval"
+path = "src/main.rs"
+
+[dependencies]
+design = { workspace = true, features = ["embed-fonts"] }
+domain.workspace = true
+renderer.workspace = true
+providers.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+bytes.workspace = true
+tokio.workspace = true
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }

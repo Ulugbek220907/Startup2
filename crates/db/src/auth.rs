@@ -13,9 +13,7 @@ pub struct AdminRow {
 }
 
 pub async fn admin_by_username(pool: &PgPool, username: &str) -> Result<Option<AdminRow>> {
-    sqlx::query_as!(AdminRow, "SELECT id, username, password_hash FROM admins WHERE username = $1", username)
-        .fetch_optional(pool)
-        .await
+    sqlx::query_as!(AdminRow, "SELECT id, username, password_hash FROM admins WHERE username = $1", username).fetch_optional(pool).await
 }
 
 pub async fn count_admins(pool: &PgPool) -> Result<i64> {
@@ -107,11 +105,7 @@ pub struct AuditRow {
 }
 
 pub async fn audit_recent(pool: &PgPool, limit: i64) -> Result<Vec<AuditRow>> {
-    sqlx::query_as!(
-        AuditRow,
-        "SELECT created_at, actor, action, entity, entity_id, detail FROM audit_log ORDER BY created_at DESC, id DESC LIMIT $1",
-        limit
-    )
-    .fetch_all(pool)
-    .await
+    sqlx::query_as!(AuditRow, "SELECT created_at, actor, action, entity, entity_id, detail FROM audit_log ORDER BY created_at DESC, id DESC LIMIT $1", limit)
+        .fetch_all(pool)
+        .await
 }

@@ -62,9 +62,7 @@ pub fn garment_svg(kind: GarmentKind, side: Side, color: Color) -> String {
                 let neck = if front { "M400 90 Q500 190 600 90" } else { "M400 90 Q500 125 600 90" };
                 s.push_str(&format!(r#"<path d="{neck}" {stroke} stroke-width="18"/>"#));
             } else if front {
-                s.push_str(&format!(
-                    r#"<path d="M400 92 Q500 228 600 92 M340 770 L660 770 L700 935 L300 935 Z" {stroke} stroke-width="5"/>"#
-                ));
+                s.push_str(&format!(r#"<path d="M400 92 Q500 228 600 92 M340 770 L660 770 L700 935 L300 935 Z" {stroke} stroke-width="5"/>"#));
                 s.push_str(&format!(r#"<path d="M462 160 L456 300 M538 160 L544 300" {stroke} stroke-width="8"/>"#));
             } else {
                 let hood = "M388 96 Q500 50 612 96 L648 250 Q500 335 352 250 Z";

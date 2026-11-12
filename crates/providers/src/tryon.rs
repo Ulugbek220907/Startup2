@@ -236,9 +236,7 @@ impl FashnTryOn {
     async fn result_bytes(&self, item: &str) -> Result<TryOnOutput, TryOnError> {
         if let Some(rest) = item.strip_prefix("data:") {
             let (meta, b64) = rest.split_once(',').ok_or_else(|| TryOnError::Unavailable("malformed data URI".into()))?;
-            let bytes = base64::engine::general_purpose::STANDARD
-                .decode(b64.trim())
-                .map_err(|e| TryOnError::Unavailable(format!("result base64: {e}")))?;
+            let bytes = base64::engine::general_purpose::STANDARD.decode(b64.trim()).map_err(|e| TryOnError::Unavailable(format!("result base64: {e}")))?;
             let mime = if meta.contains("png") { "image/png" } else { "image/jpeg" };
             return Ok(TryOnOutput { image: Bytes::from(bytes), mime });
         }
@@ -303,11 +301,7 @@ impl TryOnProvider for FashnTryOn {
             _ => {
                 let detail = run.message.or_else(|| run.error.map(|e| e.to_string())).unwrap_or_else(|| status.to_string());
                 // 4xx other than rate limiting means our request was refused.
-                return Err(if status.is_client_error() && status.as_u16() != 429 {
-                    TryOnError::Rejected(detail)
-                } else {
-                    TryOnError::Unavailable(detail)
-                });
+                return Err(if status.is_client_error() && status.as_u16() != 429 { TryOnError::Rejected(detail) } else { TryOnError::Unavailable(detail) });
             }
         };
         // Ids come from the provider; make sure one cannot alter the URL path.

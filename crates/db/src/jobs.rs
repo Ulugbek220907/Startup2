@@ -60,9 +60,7 @@ pub async fn claim(pool: &PgPool, lease_secs: i32) -> Result<Option<Job>> {
 }
 
 pub async fn complete(pool: &PgPool, id: i64) -> Result<()> {
-    sqlx::query!("UPDATE jobs SET status = 'done', locked_until = NULL, finished_at = now(), last_error = NULL WHERE id = $1", id)
-        .execute(pool)
-        .await?;
+    sqlx::query!("UPDATE jobs SET status = 'done', locked_until = NULL, finished_at = now(), last_error = NULL WHERE id = $1", id).execute(pool).await?;
     Ok(())
 }
 
@@ -98,19 +96,12 @@ pub async fn status(pool: &PgPool, public_id: Uuid) -> Result<Option<String>> {
 
 /// True if a queued or running job of this kind exists.
 pub async fn pending_exists(pool: &PgPool, kind: &str) -> Result<bool> {
-    sqlx::query_scalar!(r#"SELECT EXISTS (SELECT 1 FROM jobs WHERE kind = $1 AND status IN ('queued', 'running')) AS "e!""#, kind)
-        .fetch_one(pool)
-        .await
+    sqlx::query_scalar!(r#"SELECT EXISTS (SELECT 1 FROM jobs WHERE kind = $1 AND status IN ('queued', 'running')) AS "e!""#, kind).fetch_one(pool).await
 }
 
 /// Remove finished jobs older than `days` days so the table stays small.
 pub async fn purge_finished(pool: &PgPool, days: i32) -> Result<u64> {
-    let r = sqlx::query!(
-        "DELETE FROM jobs WHERE status IN ('done', 'failed') AND finished_at < now() - make_interval(days => $1)",
-        days
-    )
-    .execute(pool)
-    .await?;
+    let r = sqlx::query!("DELETE FROM jobs WHERE status IN ('done', 'failed') AND finished_at < now() - make_interval(days => $1)", days).execute(pool).await?;
     Ok(r.rows_affected())
 }
 

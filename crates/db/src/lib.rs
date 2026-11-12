@@ -23,11 +23,7 @@ pub type Result<T> = std::result::Result<T, sqlx::Error>;
 
 /// Connect with a small pool; one backend process serves the whole app.
 pub async fn connect(database_url: &str, max_connections: u32) -> Result<PgPool> {
-    sqlx::postgres::PgPoolOptions::new()
-        .max_connections(max_connections)
-        .acquire_timeout(std::time::Duration::from_secs(10))
-        .connect(database_url)
-        .await
+    sqlx::postgres::PgPoolOptions::new().max_connections(max_connections).acquire_timeout(std::time::Duration::from_secs(10)).connect(database_url).await
 }
 
 /// Apply pending migrations (embedded in the binary at compile time).

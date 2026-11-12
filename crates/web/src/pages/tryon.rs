@@ -48,7 +48,18 @@ fn paint_draft(ctx: Ctx, canvas: &HtmlCanvasElement, side: Side, css_w: f32, bac
         let color = garment.color(&doc.color).and_then(|c| Color::parse(&c.hex)).unwrap_or(Color::BLACK);
         let scale = draw::fit_canvas(canvas, css_w, css_w * View::FULL.aspect());
         let Some(c) = draw::context_2d(canvas) else { return false };
-        draw::draw_mockup(&c, css_w, scale, &View::FULL, garment.kind, side, color, garment.area(side), doc.layers(side), &MockupOpts { show_area: false, background });
+        draw::draw_mockup(
+            &c,
+            css_w,
+            scale,
+            &View::FULL,
+            garment.kind,
+            side,
+            color,
+            garment.area(side),
+            doc.layers(side),
+            &MockupOpts { show_area: false, background },
+        );
         // The garment image loads asynchronously; report whether it was there.
         draw::image(&draw::garment_url(garment.kind, side, color)).is_some()
     })
@@ -153,7 +164,17 @@ fn smooth(pose: BodyPose, filters: &mut [OneEuro], t: f64) -> BodyPose {
         p[0] = filters[i * 2].filter(p[0], t);
         p[1] = filters[i * 2 + 1].filter(p[1], t);
     }
-    BodyPose { shoulder_l: pts[0], shoulder_r: pts[1], hip_l: pts[2], hip_r: pts[3], elbow_l: pts[4], elbow_r: pts[5], wrist_l: pts[6], wrist_r: pts[7], ..pose }
+    BodyPose {
+        shoulder_l: pts[0],
+        shoulder_r: pts[1],
+        hip_l: pts[2],
+        hip_r: pts[3],
+        elbow_l: pts[4],
+        elbow_r: pts[5],
+        wrist_l: pts[6],
+        wrist_r: pts[7],
+        ..pose
+    }
 }
 
 #[component]
@@ -253,10 +274,15 @@ fn LiveTryOn(mode: RwSignal<Mode>) -> impl IntoView {
                 (Ok(pose), Some(kind)) => {
                     let pose = smooth(pose, &mut st.filters, t);
                     let mesh = build_mesh(&tryon_anchors(kind), &pose, 20, 22);
-                    let (mw, mh) = (platform::pose_mask_width(), platform::pose_mask_height());
-                    let mask = platform::pose_mask().to_vec();
+                    // The mask is only needed (and only fetched) while a
+                    // forearm crosses the torso.
+                    let arms_in_front = pose.forearm_front_l || pose.forearm_front_r;
+                    platform::pose_want_mask(arms_in_front);
                     if let Some(r) = st.renderer.as_mut() {
-                        r.set_mask(&mask, mw, mh);
+                        if arms_in_front {
+                            let (mw, mh) = (platform::pose_mask_width(), platform::pose_mask_height());
+                            r.set_mask(&platform::pose_mask().to_vec(), mw, mh);
+                        }
                         r.draw(&video, vw as f32, vh as f32, mirrored, Some((&mesh, &pose)));
                     }
                     if tip.get_untracked().is_some() {
@@ -365,7 +391,10 @@ fn LiveTryOn(mode: RwSignal<Mode>) -> impl IntoView {
         let Some(canvas) = canvas_ref.get_untracked() else { return };
         platform::haptic("light");
         leptos::task::spawn_local(async move {
-            let blob = wasm_bindgen_futures::JsFuture::from(platform::canvas_blob(&canvas, "image/jpeg", 0.9)).await.ok().and_then(|b| b.dyn_into::<web_sys::Blob>().ok());
+            let blob = wasm_bindgen_futures::JsFuture::from(platform::canvas_blob(&canvas, "image/jpeg", 0.9))
+                .await
+                .ok()
+                .and_then(|b| b.dyn_into::<web_sys::Blob>().ok());
             if let Some(blob) = blob {
                 let brand = ctx.catalog.with_untracked(|c| c.as_ref().map(|c| c.brand.clone()).unwrap_or_default());
                 platform::await_string(platform::share(&brand, None, Some(&blob), "tryon.jpg")).await;
@@ -444,7 +473,18 @@ fn paint_draft_fixed(ctx: Ctx, canvas: &HtmlCanvasElement, width: f32) -> bool {
         let Some(doc) = d.doc.as_ref() else { return false };
         let color = garment.color(&doc.color).and_then(|c| Color::parse(&c.hex)).unwrap_or(Color::BLACK);
         let Some(c) = draw::context_2d(canvas) else { return false };
-        draw::draw_mockup(&c, width, 1.0, &View::FULL, garment.kind, Side::Front, color, garment.area(Side::Front), doc.layers(Side::Front), &MockupOpts { show_area: false, background: None });
+        draw::draw_mockup(
+            &c,
+            width,
+            1.0,
+            &View::FULL,
+            garment.kind,
+            Side::Front,
+            color,
+            garment.area(Side::Front),
+            doc.layers(Side::Front),
+            &MockupOpts { show_area: false, background: None },
+        );
         let assets_ready = doc.front.iter().all(|l| match &l.kind {
             design::LayerKind::Image(i) => draw::image(&draw::asset_preview_url(&i.asset)).is_some(),
             design::LayerKind::Text(t) => design::fonts::FontSource::font_data(&Fonts, t.font).is_some(),
@@ -520,7 +560,9 @@ async fn precheck(file: &web_sys::File) -> Result<(), &'static str> {
             return Err("error.tryon_photo_small");
         }
         // Mean brightness of a 48x48 thumbnail.
-        if let Some(canvas) = web_sys::window().and_then(|w| w.document()).and_then(|d| d.create_element("canvas").ok()).and_then(|e| e.dyn_into::<HtmlCanvasElement>().ok()) {
+        if let Some(canvas) =
+            web_sys::window().and_then(|w| w.document()).and_then(|d| d.create_element("canvas").ok()).and_then(|e| e.dyn_into::<HtmlCanvasElement>().ok())
+        {
             canvas.set_width(48);
             canvas.set_height(48);
             if let Some(c) = draw::context_2d(&canvas) {

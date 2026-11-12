@@ -53,10 +53,8 @@ async fn design_to_order_to_admin_print_files() {
 
     // Price is computed by the server: hoodie 220 000 + front print. The
     // design's bounding box is 300-600 cm², so the 50 000 tier applies.
-    let quote = app
-        .post_json("/api/price/quote", &json!({ "doc": doc, "quantity": 2, "delivery": { "method": "delivery", "region": "tashkent-city" } }))
-        .await
-        .json();
+    let quote =
+        app.post_json("/api/price/quote", &json!({ "doc": doc, "quantity": 2, "delivery": { "method": "delivery", "region": "tashkent-city" } })).await.json();
     assert_eq!(quote["unit_garment"], 22_000_000);
     assert_eq!(quote["unit_print"], 5_000_000);
     assert_eq!(quote["total"], 2 * 27_000_000 + 2_500_000);
@@ -166,7 +164,9 @@ async fn untrusted_input_is_rejected() {
     foil["front"][0]["finish"] = json!("foil_gold");
     assert_eq!(app.post_json("/api/designs", &json!({ "doc": foil })).await.error_code(), "invalid_design");
 
-    let cases: Vec<(&str, Box<dyn Fn(&mut serde_json::Value)>, &str)> = vec![
+    // (what is wrong, how to break a valid order, expected error code)
+    type Mutate = Box<dyn Fn(&mut serde_json::Value)>;
+    let cases: Vec<(&str, Mutate, &str)> = vec![
         ("bad phone", Box::new(|b| b["phone"] = json!("12345")), "invalid_phone"),
         ("foreign phone", Box::new(|b| b["phone"] = json!("+7 901 123 45 67")), "invalid_phone"),
         ("zero quantity", Box::new(|b| b["quantity"] = json!(0)), "invalid_quantity"),
@@ -256,7 +256,9 @@ async fn security_headers_auth_and_cors() {
     assert!(!denied.headers.contains_key(header::ACCESS_CONTROL_ALLOW_ORIGIN));
 
     // Every admin route refuses anonymous access.
-    for path in ["/api/admin/me", "/api/admin/orders", "/api/admin/moderation", "/api/admin/reports", "/api/admin/pricing", "/api/admin/blocklist", "/api/admin/audit"] {
+    for path in
+        ["/api/admin/me", "/api/admin/orders", "/api/admin/moderation", "/api/admin/reports", "/api/admin/pricing", "/api/admin/blocklist", "/api/admin/audit"]
+    {
         assert_eq!(app.get(path).await.status, StatusCode::UNAUTHORIZED, "{path}");
     }
     let forged = app.send(Request::get("/api/admin/me").header(header::COOKIE, "qd_session=deadbeef").body(Body::empty()).unwrap()).await;
@@ -325,7 +327,8 @@ async fn moderation_blocks_production_until_reviewed() {
     let blocked = status("in_production").await;
     assert_eq!((blocked.status, blocked.error_code().as_str()), (StatusCode::CONFLICT, "needs_moderation"));
 
-    let decide = app.admin_json(&admin, Method::POST, &format!("/api/admin/designs/{design_id}/moderation"), &json!({ "approve": true, "note": "hazil" })).await;
+    let decide =
+        app.admin_json(&admin, Method::POST, &format!("/api/admin/designs/{design_id}/moderation"), &json!({ "approve": true, "note": "hazil" })).await;
     assert_eq!(decide.status, StatusCode::OK);
     assert_eq!(status("in_production").await.status, StatusCode::OK);
     assert!(app.admin_get(&admin, "/api/admin/moderation").await.json().as_array().unwrap().is_empty());

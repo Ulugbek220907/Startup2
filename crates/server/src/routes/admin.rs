@@ -1,7 +1,6 @@
 //! Admin API. Every handler except `login` takes an [`AdminSession`], which
 //! enforces the session cookie and (for writes) the CSRF token.
 
-
 use axum::extract::{Path, Query, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
@@ -410,4 +409,3 @@ pub async fn audit_log(State(state): State<AppState>, _s: AdminSession) -> AppRe
             .collect(),
     ))
 }
-

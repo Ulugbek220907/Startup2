@@ -89,8 +89,7 @@ pub fn sign_init_data(fields: &[(&str, &str)], bot_token: &str) -> String {
     let check = sorted.iter().map(|(k, v)| format!("{k}={v}")).collect::<Vec<_>>().join("\n");
     let secret = hmac(b"WebAppData", bot_token.as_bytes()).map(|m| m.finalize().into_bytes().to_vec()).unwrap_or_default();
     let sig = hmac(&secret, check.as_bytes()).map(|m| hex::encode(m.finalize().into_bytes())).unwrap_or_default();
-    let mut out: Vec<String> =
-        fields.iter().map(|(k, v)| format!("{k}={}", utf8_percent_encode(v, NON_ALPHANUMERIC))).collect();
+    let mut out: Vec<String> = fields.iter().map(|(k, v)| format!("{k}={}", utf8_percent_encode(v, NON_ALPHANUMERIC))).collect();
     out.push(format!("hash={sig}"));
     out.join("&")
 }

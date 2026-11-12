@@ -146,8 +146,7 @@ fn draw_ops(pm: &mut Pixmap, ops: &[DrawOp], base: sk::Transform, assets: &dyn A
                     }
                     Paint::Stroke { color, width } => {
                         sp.set_color(sk_color(color));
-                        let stroke =
-                            sk::Stroke { width, line_cap: sk::LineCap::Round, line_join: sk::LineJoin::Round, ..Default::default() };
+                        let stroke = sk::Stroke { width, line_cap: sk::LineCap::Round, line_join: sk::LineJoin::Round, ..Default::default() };
                         pm.stroke_path(&p, &sp, &stroke, ts, None);
                     }
                 }

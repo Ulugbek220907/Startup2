@@ -371,10 +371,7 @@ mod tests {
             let mesh = build_mesh(&a, &rest_pose(&a, k, off), 21, 23);
             for (pos, uv) in mesh.positions.chunks(2).zip(mesh.uvs.chunks(2)) {
                 let want = [uv[0] * ART_W * k + off[0], uv[1] * ART_H * k + off[1]];
-                assert!(
-                    (pos[0] - want[0]).abs() < 0.6 && (pos[1] - want[1]).abs() < 0.6,
-                    "{kind:?} uv {uv:?}: got {pos:?}, want {want:?}"
-                );
+                assert!((pos[0] - want[0]).abs() < 0.6 && (pos[1] - want[1]).abs() < 0.6, "{kind:?} uv {uv:?}: got {pos:?}, want {want:?}");
             }
         }
     }

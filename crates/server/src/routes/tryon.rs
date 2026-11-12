@@ -72,10 +72,8 @@ pub async fn create(
         None => Side::Front,
         Some(s) => Side::parse(s).ok_or_else(|| AppError::invalid("side must be front or back"))?,
     };
-    let design = db::designs::design_by_slug(&state.pool, &params.design)
-        .await?
-        .filter(|d| d.moderation_status != "rejected")
-        .ok_or_else(AppError::not_found)?;
+    let design =
+        db::designs::design_by_slug(&state.pool, &params.design).await?.filter(|d| d.moderation_status != "rejected").ok_or_else(AppError::not_found)?;
 
     let img = crate::uploads::decode(body).await.map_err(|e| AppError::bad_request(e.code(), "photo was rejected"))?;
     providers::tryon::precheck_photo(&img).map_err(|issue| AppError::bad_request(issue.code(), "photo failed the quality check"))?;
@@ -130,10 +128,7 @@ pub async fn create(
     tx.commit().await?;
     state.job_notify.notify_one();
 
-    Ok((
-        StatusCode::ACCEPTED,
-        Json(TryOnDto { id: id.to_string(), status: TryOnState::Queued, result_url: None, error: None, expires_at: db::ts(expires_at) }),
-    ))
+    Ok((StatusCode::ACCEPTED, Json(TryOnDto { id: id.to_string(), status: TryOnState::Queued, result_url: None, error: None, expires_at: db::ts(expires_at) })))
 }
 
 pub async fn get(State(state): State<AppState>, Path(id): Path<Uuid>) -> AppResult<Json<TryOnDto>> {

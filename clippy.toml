@@ -1,0 +1,3 @@
+# Renderer and drawing functions take geometry + sources explicitly.
+too-many-arguments-threshold = 10
+type-complexity-threshold = 400

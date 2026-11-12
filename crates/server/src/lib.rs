@@ -73,13 +73,7 @@ pub fn build_state(cfg: Config, pool: db::PgPool) -> anyhow::Result<AppState> {
 }
 
 /// Assemble state from explicit parts (tests pass in-memory fakes).
-pub fn assemble_state(
-    cfg: Config,
-    pool: db::PgPool,
-    store: Arc<dyn ObjectStore>,
-    tryon: Arc<dyn TryOnProvider>,
-    messenger: Arc<dyn Messenger>,
-) -> AppState {
+pub fn assemble_state(cfg: Config, pool: db::PgPool, store: Arc<dyn ObjectStore>, tryon: Arc<dyn TryOnProvider>, messenger: Arc<dyn Messenger>) -> AppState {
     let mode = if cfg.moderation_mock_flag_all { MockMode::FlagAll } else { MockMode::AllowAll };
     let moderator = Arc::new(MockModerator::new(mode, cfg.moderation_mock_flag_sha256.clone()));
     let csp_script_hashes = inline_script_hashes(&cfg.static_dir);
@@ -242,7 +236,7 @@ pub fn build_app(state: AppState) -> Router {
 
     let api = Router::new()
         .route("/catalog", get(public::catalog))
-        .route("/assets", post(public::upload_asset).layer(upload_limit.clone()))
+        .route("/assets", post(public::upload_asset).layer(upload_limit))
         .route("/assets/{id}/preview", get(public::asset_preview))
         .route("/assets/{id}/remove-bg", post(public::remove_background))
         .route("/designs", post(public::create_design))

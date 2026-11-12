@@ -4,7 +4,6 @@
 //! Handlers must be idempotent because a job can run more than once (a
 //! worker may crash after doing the work but before recording success).
 
-
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
@@ -452,4 +451,3 @@ async fn purge_expired(state: &AppState) -> JobResult {
     tracing::info!(tryon, sessions, limits, jobs, drafts, assets, "clean-up finished");
     Ok(())
 }
-

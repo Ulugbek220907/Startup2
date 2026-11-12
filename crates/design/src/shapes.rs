@@ -13,14 +13,7 @@ pub fn shape_path(kind: ShapeKind, w: f32, h: f32) -> Vec<PathCmd> {
         ShapeKind::Rect => vec![M(-hw, -hh), L(hw, -hh), L(hw, hh), L(-hw, hh), Z],
         ShapeKind::Ellipse => {
             let (kx, ky) = (hw * KAPPA, hh * KAPPA);
-            vec![
-                M(0.0, -hh),
-                C(kx, -hh, hw, -ky, hw, 0.0),
-                C(hw, ky, kx, hh, 0.0, hh),
-                C(-kx, hh, -hw, ky, -hw, 0.0),
-                C(-hw, -ky, -kx, -hh, 0.0, -hh),
-                Z,
-            ]
+            vec![M(0.0, -hh), C(kx, -hh, hw, -ky, hw, 0.0), C(hw, ky, kx, hh, 0.0, hh), C(-kx, hh, -hw, ky, -hw, 0.0), C(-hw, -ky, -kx, -hh, 0.0, -hh), Z]
         }
         ShapeKind::Triangle => vec![M(0.0, -hh), L(hw, hh), L(-hw, hh), Z],
         ShapeKind::Star => {

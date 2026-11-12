@@ -29,12 +29,7 @@ fn assets() -> HashMap<String, Arc<image::RgbaImage>> {
 }
 
 fn text(id: &str, x: f32, y: f32, s: &str, font: FontId, size: f32, color: Color, curve: f32) -> Layer {
-    Layer::new(
-        id,
-        x,
-        y,
-        LayerKind::Text(TextLayer { text: s.into(), font, size_cm: size, color, outline: None, curve, align: Align::Center }),
-    )
+    Layer::new(id, x, y, LayerKind::Text(TextLayer { text: s.into(), font, size_cm: size, color, outline: None, curve, align: Align::Center }))
 }
 
 /// One design exercising every layer type.
@@ -61,12 +56,8 @@ fn fixture() -> DesignDoc {
         }),
     ));
     d.front.push(Layer::new("k1", 24.0, 24.0, LayerKind::Sticker(StickerLayer { sticker: "smile".into(), width_cm: 7.0, color: Color::WHITE })));
-    let mut img = Layer::new(
-        "i1",
-        15.0,
-        31.0,
-        LayerKind::Image(ImageLayer { asset: ASSET.into(), width_cm: 8.0, height_cm: 6.0, px_width: 64, px_height: 48 }),
-    );
+    let mut img =
+        Layer::new("i1", 15.0, 31.0, LayerKind::Image(ImageLayer { asset: ASSET.into(), width_cm: 8.0, height_cm: 6.0, px_width: 64, px_height: 48 }));
     img.rotation = 12.0;
     img.flip_x = true;
     d.front.push(img);
@@ -100,9 +91,7 @@ fn assert_golden(name: &str, pm: &Pixmap) {
         std::fs::write(&path, &png).unwrap();
         return;
     }
-    let want = image::open(&path)
-        .unwrap_or_else(|e| panic!("missing golden {path:?} ({e}); run with UPDATE_GOLDEN=1"))
-        .to_rgba8();
+    let want = image::open(&path).unwrap_or_else(|e| panic!("missing golden {path:?} ({e}); run with UPDATE_GOLDEN=1")).to_rgba8();
     let got = image::load_from_memory(&png).unwrap().to_rgba8();
     assert_eq!((got.width(), got.height()), (want.width(), want.height()), "{name}: size changed");
     let mut differing = 0usize;
@@ -142,9 +131,20 @@ fn mockups_match_golden() {
     assert_golden("mockup_hoodie_front.png", &pm);
     let pm = render_mockup(&doc, Side::Back, GarmentKind::Tshirt, Color::WHITE, &TEE_BACK, 500, &EmbeddedFonts, &assets()).unwrap();
     assert_golden("mockup_tshirt_back.png", &pm);
-    let pm = render_mockup(&DesignDoc::new("sweatshirt", "x"), Side::Front, GarmentKind::Sweatshirt, Color::rgb(120, 130, 140), &TEE_BACK, 500, &EmbeddedFonts, &assets()).unwrap();
+    let pm = render_mockup(
+        &DesignDoc::new("sweatshirt", "x"),
+        Side::Front,
+        GarmentKind::Sweatshirt,
+        Color::rgb(120, 130, 140),
+        &TEE_BACK,
+        500,
+        &EmbeddedFonts,
+        &assets(),
+    )
+    .unwrap();
     assert_golden("mockup_sweatshirt_blank.png", &pm);
-    let pm = render_mockup(&DesignDoc::new("hoodie", "x"), Side::Back, GarmentKind::Hoodie, Color::rgb(255, 223, 0), &TEE_BACK, 500, &EmbeddedFonts, &assets()).unwrap();
+    let pm = render_mockup(&DesignDoc::new("hoodie", "x"), Side::Back, GarmentKind::Hoodie, Color::rgb(255, 223, 0), &TEE_BACK, 500, &EmbeddedFonts, &assets())
+        .unwrap();
     assert_golden("mockup_hoodie_back_blank.png", &pm);
 }
 
@@ -166,8 +166,20 @@ fn production_sheet_matches_golden_and_is_a_pdf() {
         notes: Some("Iltimos, yozuvni biroz yuqoriroq joylashtiring. Срочно, к пятнице! Please pack each piece separately.".into()),
         admin_url: "https://example.uz/admin/#/orders/0b9f6c0e-1111-4222-8333-444455556666".into(),
         sides: vec![
-            SheetSide { label: "Old".into(), area_w_cm: 30.0, area_h_cm: 35.0, printed_cm: Some((27.4, 33.0)), mockup: Some(mock(Side::Front, GarmentKind::Hoodie, &HOODIE_FRONT)) },
-            SheetSide { label: "Orqa".into(), area_w_cm: 30.0, area_h_cm: 40.0, printed_cm: None, mockup: Some(mock(Side::Back, GarmentKind::Hoodie, &TEE_BACK)) },
+            SheetSide {
+                label: "Old".into(),
+                area_w_cm: 30.0,
+                area_h_cm: 35.0,
+                printed_cm: Some((27.4, 33.0)),
+                mockup: Some(mock(Side::Front, GarmentKind::Hoodie, &HOODIE_FRONT)),
+            },
+            SheetSide {
+                label: "Orqa".into(),
+                area_w_cm: 30.0,
+                area_h_cm: 40.0,
+                printed_cm: None,
+                mockup: Some(mock(Side::Back, GarmentKind::Hoodie, &TEE_BACK)),
+            },
         ],
         lang: domain::Lang::Uz,
     };

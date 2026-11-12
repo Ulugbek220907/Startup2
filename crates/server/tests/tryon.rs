@@ -115,7 +115,7 @@ async fn daily_cost_cap_stops_paid_generations() {
             domain::Tiyin(100_000) // 1 000 soʻm
         }
         async fn generate(&self, req: TryOnRequest) -> Result<TryOnOutput, TryOnError> {
-            if req.person_jpeg.len() % 2 == 0 {
+            if req.person_jpeg.len().is_multiple_of(2) {
                 return Err(TryOnError::Rejected("cannot see a torso".into()));
             }
             Ok(TryOnOutput { image: mock_composite(&req.person_jpeg, &req.garment_png)?, mime: "image/jpeg" })

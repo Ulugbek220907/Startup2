@@ -39,13 +39,9 @@ pub async fn customer_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Cust
 }
 
 pub async fn customer_by_telegram(pool: &PgPool, telegram_id: i64) -> Result<Option<CustomerRow>> {
-    sqlx::query_as!(
-        CustomerRow,
-        "SELECT id, phone, telegram_id, telegram_chat_id, name, lang FROM customers WHERE telegram_id = $1",
-        telegram_id
-    )
-    .fetch_optional(pool)
-    .await
+    sqlx::query_as!(CustomerRow, "SELECT id, phone, telegram_id, telegram_chat_id, name, lang FROM customers WHERE telegram_id = $1", telegram_id)
+        .fetch_optional(pool)
+        .await
 }
 
 /// Remember a Telegram user before they share a phone number.
@@ -73,15 +69,11 @@ pub async fn link_telegram_phone(conn: &mut PgConnection, telegram_id: i64, chat
     match by_phone {
         Some(id) => {
             // Free the unique telegram_id from any phone-less placeholder row.
-            sqlx::query!("DELETE FROM customers WHERE telegram_id = $1 AND id <> $2 AND phone IS NULL", telegram_id, id)
-                .execute(&mut *conn)
-                .await?;
+            sqlx::query!("DELETE FROM customers WHERE telegram_id = $1 AND id <> $2 AND phone IS NULL", telegram_id, id).execute(&mut *conn).await?;
             sqlx::query!("UPDATE customers SET telegram_id = NULL, telegram_chat_id = NULL WHERE telegram_id = $1 AND id <> $2", telegram_id, id)
                 .execute(&mut *conn)
                 .await?;
-            sqlx::query!("UPDATE customers SET telegram_id = $2, telegram_chat_id = $3 WHERE id = $1", id, telegram_id, chat_id)
-                .execute(&mut *conn)
-                .await?;
+            sqlx::query!("UPDATE customers SET telegram_id = $2, telegram_chat_id = $3 WHERE id = $1", id, telegram_id, chat_id).execute(&mut *conn).await?;
         }
         None => {
             sqlx::query!(
@@ -184,9 +176,7 @@ pub async fn insert_order(conn: &mut PgConnection, o: &NewOrder<'_>, item: &NewI
     )
     .execute(&mut *conn)
     .await?;
-    sqlx::query!("INSERT INTO order_status_log (order_id, from_status, to_status, actor) VALUES ($1, NULL, 'new', 'customer')", id)
-        .execute(&mut *conn)
-        .await?;
+    sqlx::query!("INSERT INTO order_status_log (order_id, from_status, to_status, actor) VALUES ($1, NULL, 'new', 'customer')", id).execute(&mut *conn).await?;
     Ok(id)
 }
 
@@ -308,22 +298,13 @@ pub async fn status_log(pool: &PgPool, order_id: Uuid) -> Result<Vec<StatusLogRo
 /// of the WHERE clause, so two admins clicking at once cannot both succeed.
 /// Returns false when the order was no longer in `from`.
 pub async fn change_status(conn: &mut PgConnection, order_id: Uuid, from: &str, to: &str, actor: &str, note: Option<&str>) -> Result<bool> {
-    let r = sqlx::query!("UPDATE orders SET status = $3, updated_at = now() WHERE id = $1 AND status = $2", order_id, from, to)
-        .execute(&mut *conn)
-        .await?;
+    let r = sqlx::query!("UPDATE orders SET status = $3, updated_at = now() WHERE id = $1 AND status = $2", order_id, from, to).execute(&mut *conn).await?;
     if r.rows_affected() != 1 {
         return Ok(false);
     }
-    sqlx::query!(
-        "INSERT INTO order_status_log (order_id, from_status, to_status, actor, note) VALUES ($1, $2, $3, $4, $5)",
-        order_id,
-        from,
-        to,
-        actor,
-        note
-    )
-    .execute(&mut *conn)
-    .await?;
+    sqlx::query!("INSERT INTO order_status_log (order_id, from_status, to_status, actor, note) VALUES ($1, $2, $3, $4, $5)", order_id, from, to, actor, note)
+        .execute(&mut *conn)
+        .await?;
     Ok(true)
 }
 
@@ -353,20 +334,13 @@ pub async fn upsert_file(ex: impl PgExecutor<'_>, order_id: Uuid, kind: &str, st
 }
 
 pub async fn files(pool: &PgPool, order_id: Uuid) -> Result<Vec<FileRow>> {
-    sqlx::query_as!(FileRow, "SELECT kind, storage_key, mime, bytes FROM order_files WHERE order_id = $1 ORDER BY kind", order_id)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as!(FileRow, "SELECT kind, storage_key, mime, bytes FROM order_files WHERE order_id = $1 ORDER BY kind", order_id).fetch_all(pool).await
 }
 
 pub async fn file(pool: &PgPool, order_id: Uuid, kind: &str) -> Result<Option<FileRow>> {
-    sqlx::query_as!(
-        FileRow,
-        "SELECT kind, storage_key, mime, bytes FROM order_files WHERE order_id = $1 AND kind = $2",
-        order_id,
-        kind
-    )
-    .fetch_optional(pool)
-    .await
+    sqlx::query_as!(FileRow, "SELECT kind, storage_key, mime, bytes FROM order_files WHERE order_id = $1 AND kind = $2", order_id, kind)
+        .fetch_optional(pool)
+        .await
 }
 
 pub async fn set_files_status(ex: impl PgExecutor<'_>, order_id: Uuid, status: &str) -> Result<()> {
@@ -377,12 +351,7 @@ pub async fn set_files_status(ex: impl PgExecutor<'_>, order_id: Uuid, status: &
 // ------------------------------------------------------------- privacy
 
 pub async fn count_active_orders(pool: &PgPool, phone: &str) -> Result<i64> {
-    sqlx::query_scalar!(
-        r#"SELECT count(*) AS "n!" FROM orders WHERE phone = $1 AND status NOT IN ('delivered', 'cancelled')"#,
-        phone
-    )
-    .fetch_one(pool)
-    .await
+    sqlx::query_scalar!(r#"SELECT count(*) AS "n!" FROM orders WHERE phone = $1 AND status NOT IN ('delivered', 'cancelled')"#, phone).fetch_one(pool).await
 }
 
 /// Erase a customer's personal data: finished orders keep their amounts and

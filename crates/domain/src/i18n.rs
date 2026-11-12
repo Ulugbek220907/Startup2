@@ -84,11 +84,7 @@ fn tables() -> &'static [Table; 3] {
     static TABLES: OnceLock<[Table; 3]> = OnceLock::new();
     TABLES.get_or_init(|| {
         let parse = |src: &str| -> Table { serde_json::from_str(src).expect("locale file is valid JSON (checked by tests)") };
-        [
-            parse(include_str!("../locales/uz.json")),
-            parse(include_str!("../locales/ru.json")),
-            parse(include_str!("../locales/en.json")),
-        ]
+        [parse(include_str!("../locales/uz.json")), parse(include_str!("../locales/ru.json")), parse(include_str!("../locales/en.json"))]
     })
 }
 

@@ -30,7 +30,10 @@ pub enum FillRule {
 pub enum Paint {
     Fill(Color, FillRule),
     /// Round-joined, round-capped stroke; width in the path's local cm.
-    Stroke { color: Color, width: f32 },
+    Stroke {
+        color: Color,
+        width: f32,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -117,11 +120,7 @@ pub fn layer_ops(l: &Layer, fonts: &dyn FontSource) -> Vec<DrawOp> {
                 if let Some(o) = t.outline.filter(|o| o.width_cm > 0.0) {
                     // The outline is stroked first and twice as wide, so the
                     // fill on top keeps the letter shapes crisp.
-                    ops.push(DrawOp::Path {
-                        path: lay.path.clone(),
-                        paint: Paint::Stroke { color: o.color, width: o.width_cm * 2.0 },
-                        transform,
-                    });
+                    ops.push(DrawOp::Path { path: lay.path.clone(), paint: Paint::Stroke { color: o.color, width: o.width_cm * 2.0 }, transform });
                 }
                 ops.push(DrawOp::Path { path: lay.path, paint: Paint::Fill(t.color, FillRule::NonZero), transform });
             }
@@ -134,11 +133,7 @@ pub fn layer_ops(l: &Layer, fonts: &dyn FontSource) -> Vec<DrawOp> {
                 if s.points.is_empty() {
                     continue;
                 }
-                ops.push(DrawOp::Path {
-                    path: freehand_path(&s.points),
-                    paint: Paint::Stroke { color: s.color, width: s.width_cm },
-                    transform,
-                });
+                ops.push(DrawOp::Path { path: freehand_path(&s.points), paint: Paint::Stroke { color: s.color, width: s.width_cm }, transform });
             }
         }
         LayerKind::Shape(s) => {
@@ -152,11 +147,7 @@ pub fn layer_ops(l: &Layer, fonts: &dyn FontSource) -> Vec<DrawOp> {
         }
         LayerKind::Sticker(s) => {
             if let Some(def) = stickers::find(&s.sticker) {
-                ops.push(DrawOp::Path {
-                    path: stickers::path_cm(def, s.width_cm),
-                    paint: Paint::Fill(s.color, FillRule::EvenOdd),
-                    transform,
-                });
+                ops.push(DrawOp::Path { path: stickers::path_cm(def, s.width_cm), paint: Paint::Fill(s.color, FillRule::EvenOdd), transform });
             }
         }
     }
@@ -207,12 +198,7 @@ mod tests {
     use crate::fonts::{EmbeddedFonts, FontId};
 
     fn rect_layer(x: f32, y: f32, w: f32, h: f32) -> Layer {
-        Layer::new(
-            "r",
-            x,
-            y,
-            LayerKind::Shape(ShapeLayer { shape: ShapeKind::Rect, width_cm: w, height_cm: h, fill: Some(Color::BLACK), stroke: None }),
-        )
+        Layer::new("r", x, y, LayerKind::Shape(ShapeLayer { shape: ShapeKind::Rect, width_cm: w, height_cm: h, fill: Some(Color::BLACK), stroke: None }))
     }
 
     #[test]

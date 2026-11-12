@@ -44,15 +44,11 @@ pub async fn insert_asset(pool: &PgPool, a: &NewAsset<'_>) -> Result<()> {
 }
 
 pub async fn asset(pool: &PgPool, id: Uuid) -> Result<Option<AssetRow>> {
-    sqlx::query_as!(AssetRow, "SELECT id, mime, width, height, storage_key, preview_key FROM assets WHERE id = $1", id)
-        .fetch_optional(pool)
-        .await
+    sqlx::query_as!(AssetRow, "SELECT id, mime, width, height, storage_key, preview_key FROM assets WHERE id = $1", id).fetch_optional(pool).await
 }
 
 pub async fn assets_by_ids(pool: &PgPool, ids: &[Uuid]) -> Result<Vec<AssetRow>> {
-    sqlx::query_as!(AssetRow, "SELECT id, mime, width, height, storage_key, preview_key FROM assets WHERE id = ANY($1)", ids)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as!(AssetRow, "SELECT id, mime, width, height, storage_key, preview_key FROM assets WHERE id = ANY($1)", ids).fetch_all(pool).await
 }
 
 pub struct DesignRow {
@@ -146,27 +142,18 @@ pub async fn set_auto_moderation(ex: impl PgExecutor<'_>, id: Uuid, flagged: boo
 
 /// Flag a design for review (reports), unless a human already rejected it.
 pub async fn flag_design(ex: impl PgExecutor<'_>, id: Uuid, reason: &str) -> Result<()> {
-    sqlx::query!(
-        "UPDATE designs SET moderation_status = 'flagged', moderation_reason = $2 WHERE id = $1 AND moderation_status <> 'rejected'",
-        id,
-        reason
-    )
-    .execute(ex)
-    .await?;
+    sqlx::query!("UPDATE designs SET moderation_status = 'flagged', moderation_reason = $2 WHERE id = $1 AND moderation_status <> 'rejected'", id, reason)
+        .execute(ex)
+        .await?;
     Ok(())
 }
 
 /// Record a human decision.
 pub async fn decide_moderation(ex: impl PgExecutor<'_>, id: Uuid, approve: bool, note: Option<&str>) -> Result<bool> {
     let status = if approve { "approved" } else { "rejected" };
-    let r = sqlx::query!(
-        "UPDATE designs SET moderation_status = $2, moderation_reason = COALESCE($3, moderation_reason) WHERE id = $1",
-        id,
-        status,
-        note
-    )
-    .execute(ex)
-    .await?;
+    let r = sqlx::query!("UPDATE designs SET moderation_status = $2, moderation_reason = COALESCE($3, moderation_reason) WHERE id = $1", id, status, note)
+        .execute(ex)
+        .await?;
     Ok(r.rows_affected() == 1)
 }
 
@@ -200,15 +187,9 @@ pub async fn moderation_queue(pool: &PgPool) -> Result<Vec<ModerationRow>> {
 }
 
 pub async fn insert_report(ex: impl PgExecutor<'_>, design_id: Uuid, kind: &str, reason: &str, contact: Option<&str>) -> Result<Uuid> {
-    sqlx::query_scalar!(
-        "INSERT INTO design_reports (design_id, kind, reason, contact) VALUES ($1, $2, $3, $4) RETURNING id",
-        design_id,
-        kind,
-        reason,
-        contact
-    )
-    .fetch_one(ex)
-    .await
+    sqlx::query_scalar!("INSERT INTO design_reports (design_id, kind, reason, contact) VALUES ($1, $2, $3, $4) RETURNING id", design_id, kind, reason, contact)
+        .fetch_one(ex)
+        .await
 }
 
 pub struct ReportRow {

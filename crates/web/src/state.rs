@@ -94,7 +94,8 @@ pub fn device_id() -> String {
     if let Some(id) = store_get::<String>("qd.device") {
         return id;
     }
-    let id = web_sys::window().and_then(|w| w.crypto().ok()).map(|c| c.random_uuid()).unwrap_or_else(|| format!("dev-{:016x}", js_sys::Math::random().to_bits()));
+    let id =
+        web_sys::window().and_then(|w| w.crypto().ok()).map(|c| c.random_uuid()).unwrap_or_else(|| format!("dev-{:016x}", js_sys::Math::random().to_bits()));
     store_set("qd.device", &id);
     id
 }
@@ -118,9 +119,7 @@ impl Ctx {
                 return Lang::detect(&tg_lang);
             }
             // navigator.languages is the user's ordered preference list.
-            let prefs: Vec<String> = web_sys::window()
-                .map(|w| w.navigator().languages().iter().filter_map(|v| v.as_string()).collect())
-                .unwrap_or_default();
+            let prefs: Vec<String> = web_sys::window().map(|w| w.navigator().languages().iter().filter_map(|v| v.as_string()).collect()).unwrap_or_default();
             Lang::detect_from(prefs.iter().map(String::as_str))
         });
         let mut draft: Draft = store_get("qd.draft").unwrap_or_default();

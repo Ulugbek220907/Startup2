@@ -130,16 +130,7 @@ pub fn layout(t: &TextLayer, fonts: &dyn FontSource) -> Option<TextLayout> {
     let up = theta > 0.0;
 
     let mut path = Vec::new();
-    let mut sink = Sink {
-        out: &mut path,
-        scale,
-        cos: 1.0,
-        sin: 0.0,
-        tx: 0.0,
-        ty: 0.0,
-        min: (f32::MAX, f32::MAX),
-        max: (f32::MIN, f32::MIN),
-    };
+    let mut sink = Sink { out: &mut path, scale, cos: 1.0, sin: 0.0, tx: 0.0, ty: 0.0, min: (f32::MAX, f32::MAX), max: (f32::MIN, f32::MIN) };
 
     for (i, line) in lines.iter().enumerate() {
         // Baseline y of this line, block vertically centred on the origin.
@@ -187,11 +178,7 @@ pub fn layout(t: &TextLayer, fonts: &dyn FontSource) -> Option<TextLayout> {
         }
     }
 
-    let bounds = if sink.min.0 > sink.max.0 {
-        Rect::EMPTY
-    } else {
-        Rect::new(sink.min.0, sink.min.1, sink.max.0 - sink.min.0, sink.max.1 - sink.min.1)
-    };
+    let bounds = if sink.min.0 > sink.max.0 { Rect::EMPTY } else { Rect::new(sink.min.0, sink.min.1, sink.max.0 - sink.min.0, sink.max.1 - sink.min.1) };
     Some(TextLayout { path, bounds })
 }
 

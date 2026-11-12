@@ -17,3 +17,5 @@ mobile/ios/DerivedData/
 eval/out/
 .DS_Store
 e2e/out/
+eval/photos/*
+!eval/photos/.gitkeep

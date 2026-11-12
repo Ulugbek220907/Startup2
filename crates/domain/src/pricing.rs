@@ -184,11 +184,7 @@ mod tests {
     fn worked_example() {
         // Hoodie 260 000, front 350 cm² (35 000) + back 80 cm² (20 000),
         // 6 pieces (5 % off), delivery 25 000.
-        let q = quote(
-            &QuoteInput { garment_base: sum(260_000), side_areas_cm2: vec![350, 80], quantity: 6, delivery_fee: sum(25_000) },
-            &table(),
-        )
-        .unwrap();
+        let q = quote(&QuoteInput { garment_base: sum(260_000), side_areas_cm2: vec![350, 80], quantity: 6, delivery_fee: sum(25_000) }, &table()).unwrap();
         assert_eq!(q.unit_print, sum(55_000));
         assert_eq!(q.unit_price, sum(315_000));
         assert_eq!(q.subtotal, sum(1_890_000));
@@ -214,14 +210,8 @@ mod tests {
         assert_eq!(quote(&QuoteInput { quantity: 0, ..base.clone() }, &table()), Err(PricingError::InvalidQuantity));
         assert_eq!(quote(&QuoteInput { quantity: 501, ..base.clone() }, &table()), Err(PricingError::InvalidQuantity));
         assert_eq!(quote(&QuoteInput { side_areas_cm2: vec![0, 0], ..base.clone() }, &table()), Err(PricingError::EmptyDesign));
-        assert_eq!(
-            quote(&QuoteInput { garment_base: Tiyin(-1), ..base.clone() }, &table()),
-            Err(PricingError::Money(MoneyError::Negative))
-        );
-        assert_eq!(
-            quote(&QuoteInput { garment_base: Tiyin(i64::MAX), ..base.clone() }, &table()),
-            Err(PricingError::Money(MoneyError::Overflow))
-        );
+        assert_eq!(quote(&QuoteInput { garment_base: Tiyin(-1), ..base.clone() }, &table()), Err(PricingError::Money(MoneyError::Negative)));
+        assert_eq!(quote(&QuoteInput { garment_base: Tiyin(i64::MAX), ..base.clone() }, &table()), Err(PricingError::Money(MoneyError::Overflow)));
         let bad = PriceTable { discounts: vec![QuantityDiscount { min_qty: 1, percent_bp: 10_001 }], ..table() };
         assert_eq!(quote(&base, &bad), Err(PricingError::InvalidTable));
     }
@@ -229,25 +219,17 @@ mod tests {
     // proptest generates hundreds of random inputs per test and shrinks any
     // failure to a minimal counter-example.
     fn arb_table() -> impl Strategy<Value = PriceTable> {
-        (
-            prop::collection::vec((1u32..5000, 0i64..100_000_000), 1..6),
-            prop::collection::vec((1u32..600, 0u32..=10_000), 0..5),
-        )
-            .prop_map(|(tiers, discounts)| PriceTable {
+        (prop::collection::vec((1u32..5000, 0i64..100_000_000), 1..6), prop::collection::vec((1u32..600, 0u32..=10_000), 0..5)).prop_map(
+            |(tiers, discounts)| PriceTable {
                 tiers: tiers.into_iter().map(|(a, p)| AreaTier { max_area_cm2: a, price: Tiyin(p) }).collect(),
                 discounts: discounts.into_iter().map(|(q, bp)| QuantityDiscount { min_qty: q, percent_bp: bp }).collect(),
-            })
+            },
+        )
     }
 
     fn arb_input() -> impl Strategy<Value = QuoteInput> {
-        (0i64..1_000_000_000, prop::collection::vec(0u32..6000, 1..3), 1u32..=MAX_QUANTITY, 0i64..100_000_000).prop_map(
-            |(base, areas, quantity, fee)| QuoteInput {
-                garment_base: Tiyin(base),
-                side_areas_cm2: areas,
-                quantity,
-                delivery_fee: Tiyin(fee),
-            },
-        )
+        (0i64..1_000_000_000, prop::collection::vec(0u32..6000, 1..3), 1u32..=MAX_QUANTITY, 0i64..100_000_000)
+            .prop_map(|(base, areas, quantity, fee)| QuoteInput { garment_base: Tiyin(base), side_areas_cm2: areas, quantity, delivery_fee: Tiyin(fee) })
     }
 
     proptest! {
@@ -288,7 +270,7 @@ mod tests {
         }
 
         #[test]
-        fn effective_unit_price_never_rises_with_quantity(q1 in 1u32..=MAX_QUANTITY, q2 in 1u32..=MAX_QUANTITY, base in 0i64..500_000_00) {
+        fn effective_unit_price_never_rises_with_quantity(q1 in 1u32..=MAX_QUANTITY, q2 in 1u32..=MAX_QUANTITY, base in 0i64..50_000_000) {
             // With discounts that grow with quantity, buying more is never
             // more expensive per piece (allowing 1 soʻm of rounding).
             let (lo, hi) = (q1.min(q2), q1.max(q2));

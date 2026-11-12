@@ -134,12 +134,7 @@ impl Rect {
 
     /// Bounding box of this rect after an affine transform.
     pub fn transformed(&self, t: &Affine) -> Rect {
-        let pts = [
-            t.apply(self.x, self.y),
-            t.apply(self.right(), self.y),
-            t.apply(self.right(), self.bottom()),
-            t.apply(self.x, self.bottom()),
-        ];
+        let pts = [t.apply(self.x, self.y), t.apply(self.right(), self.y), t.apply(self.right(), self.bottom()), t.apply(self.x, self.bottom())];
         Rect::from_points(pts.iter().copied())
     }
 

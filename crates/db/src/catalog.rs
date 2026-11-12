@@ -10,20 +10,14 @@ use crate::Result;
 
 /// Active garments with colours, sizes and print areas.
 pub async fn garments(pool: &PgPool) -> Result<Vec<GarmentDto>> {
-    let rows = sqlx::query!(
-        "SELECT id, slug, kind, name_uz, name_ru, name_en, base_price_tiyin FROM garments WHERE active ORDER BY sort, slug"
-    )
-    .fetch_all(pool)
-    .await?;
-    let colors = sqlx::query!("SELECT garment_id, slug, name_uz, name_ru, name_en, hex FROM garment_colors ORDER BY sort, slug")
+    let rows = sqlx::query!("SELECT id, slug, kind, name_uz, name_ru, name_en, base_price_tiyin FROM garments WHERE active ORDER BY sort, slug")
         .fetch_all(pool)
         .await?;
+    let colors = sqlx::query!("SELECT garment_id, slug, name_uz, name_ru, name_en, hex FROM garment_colors ORDER BY sort, slug").fetch_all(pool).await?;
     let sizes = sqlx::query!("SELECT garment_id, size FROM garment_sizes ORDER BY sort, size").fetch_all(pool).await?;
-    let areas = sqlx::query!(
-        "SELECT garment_id, side, width_cm, height_cm, mock_x, mock_y, mock_w, mock_h FROM print_areas ORDER BY side DESC"
-    )
-    .fetch_all(pool)
-    .await?;
+    let areas = sqlx::query!("SELECT garment_id, side, width_cm, height_cm, mock_x, mock_y, mock_w, mock_h FROM print_areas ORDER BY side DESC")
+        .fetch_all(pool)
+        .await?;
 
     let mut out = Vec::with_capacity(rows.len());
     for g in rows {
@@ -66,16 +60,10 @@ pub async fn garments(pool: &PgPool) -> Result<Vec<GarmentDto>> {
 }
 
 pub async fn regions(pool: &PgPool) -> Result<Vec<RegionDto>> {
-    let rows = sqlx::query!("SELECT slug, name_uz, name_ru, name_en, delivery_fee_tiyin FROM regions WHERE active ORDER BY sort, slug")
-        .fetch_all(pool)
-        .await?;
+    let rows = sqlx::query!("SELECT slug, name_uz, name_ru, name_en, delivery_fee_tiyin FROM regions WHERE active ORDER BY sort, slug").fetch_all(pool).await?;
     Ok(rows
         .into_iter()
-        .map(|r| RegionDto {
-            slug: r.slug,
-            name: L10n { uz: r.name_uz, ru: r.name_ru, en: r.name_en },
-            delivery_fee: Tiyin(r.delivery_fee_tiyin),
-        })
+        .map(|r| RegionDto { slug: r.slug, name: L10n { uz: r.name_uz, ru: r.name_ru, en: r.name_en }, delivery_fee: Tiyin(r.delivery_fee_tiyin) })
         .collect())
 }
 
@@ -84,10 +72,7 @@ pub async fn price_table(pool: &PgPool) -> Result<PriceTable> {
     let discounts = sqlx::query!("SELECT min_qty, percent_bp FROM quantity_discounts ORDER BY min_qty").fetch_all(pool).await?;
     Ok(PriceTable {
         tiers: tiers.into_iter().map(|t| AreaTier { max_area_cm2: t.max_area_cm2 as u32, price: Tiyin(t.price_tiyin) }).collect(),
-        discounts: discounts
-            .into_iter()
-            .map(|d| QuantityDiscount { min_qty: d.min_qty as u32, percent_bp: d.percent_bp as u32 })
-            .collect(),
+        discounts: discounts.into_iter().map(|d| QuantityDiscount { min_qty: d.min_qty as u32, percent_bp: d.percent_bp as u32 }).collect(),
     })
 }
 
@@ -96,13 +81,7 @@ pub async fn setting(pool: &PgPool, key: &str) -> Result<Option<serde_json::Valu
 }
 
 pub async fn set_setting(ex: impl PgExecutor<'_>, key: &str, value: &serde_json::Value) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-        key,
-        value
-    )
-    .execute(ex)
-    .await?;
+    sqlx::query!("INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", key, value).execute(ex).await?;
     Ok(())
 }
 
@@ -116,9 +95,7 @@ pub async fn set_garment_price(ex: impl PgExecutor<'_>, slug: &str, price: Tiyin
 pub async fn replace_tiers(conn: &mut PgConnection, tiers: &[AreaTier]) -> Result<()> {
     sqlx::query!("DELETE FROM price_tiers").execute(&mut *conn).await?;
     for t in tiers {
-        sqlx::query!("INSERT INTO price_tiers (max_area_cm2, price_tiyin) VALUES ($1, $2)", t.max_area_cm2 as i32, t.price.0)
-            .execute(&mut *conn)
-            .await?;
+        sqlx::query!("INSERT INTO price_tiers (max_area_cm2, price_tiyin) VALUES ($1, $2)", t.max_area_cm2 as i32, t.price.0).execute(&mut *conn).await?;
     }
     Ok(())
 }
@@ -126,9 +103,7 @@ pub async fn replace_tiers(conn: &mut PgConnection, tiers: &[AreaTier]) -> Resul
 pub async fn replace_discounts(conn: &mut PgConnection, discounts: &[QuantityDiscount]) -> Result<()> {
     sqlx::query!("DELETE FROM quantity_discounts").execute(&mut *conn).await?;
     for d in discounts {
-        sqlx::query!("INSERT INTO quantity_discounts (min_qty, percent_bp) VALUES ($1, $2)", d.min_qty as i32, d.percent_bp as i32)
-            .execute(&mut *conn)
-            .await?;
+        sqlx::query!("INSERT INTO quantity_discounts (min_qty, percent_bp) VALUES ($1, $2)", d.min_qty as i32, d.percent_bp as i32).execute(&mut *conn).await?;
     }
     Ok(())
 }

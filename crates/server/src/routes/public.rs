@@ -133,17 +133,12 @@ fn doc_json(doc: &DesignDoc) -> AppResult<serde_json::Value> {
     serde_json::to_value(doc).map_err(AppError::internal)
 }
 
-pub async fn create_design(
-    State(state): State<AppState>,
-    ClientIp(ip): ClientIp,
-    Json(req): Json<SaveDesignRequest>,
-) -> AppResult<Json<DesignSavedDto>> {
+pub async fn create_design(State(state): State<AppState>, ClientIp(ip): ClientIp, Json(req): Json<SaveDesignRequest>) -> AppResult<Json<DesignSavedDto>> {
     rate_limit(&state, "design", &ip, HOUR, 120).await?;
     validated(&state, &req.doc)?;
     let slug = random_code(10)?.to_lowercase();
     let edit_token = crate::auth::random_token(24)?;
-    db::designs::insert_design(&state.pool, &slug, &sha256_hex(edit_token.as_bytes()), req.doc.version as i32, &doc_json(&req.doc)?, &req.doc.garment)
-        .await?;
+    db::designs::insert_design(&state.pool, &slug, &sha256_hex(edit_token.as_bytes()), req.doc.version as i32, &doc_json(&req.doc)?, &req.doc.garment).await?;
     Ok(Json(DesignSavedDto { slug, edit_token }))
 }
 
@@ -309,13 +304,13 @@ pub async fn create_order(
     }
 
     let priced = price(&state, &req.doc, req.quantity, &req.delivery).await?;
-    if !priced.garment.sizes.iter().any(|s| *s == req.size) {
+    if !priced.garment.sizes.contains(&req.size) {
         return Err(AppError::bad_request("size_required", "choose a size"));
     }
     let name = opt_text(&req.customer_name, 80);
     let notes = opt_text(&req.notes, 500);
     let address = opt_text(&req.address, 300);
-    if req.delivery.method == DeliveryMethod::Delivery && address.as_deref().map_or(true, |a| a.chars().count() < 5) {
+    if req.delivery.method == DeliveryMethod::Delivery && address.as_deref().is_none_or(|a| a.chars().count() < 5) {
         return Err(AppError::bad_request("address_required", "enter the delivery address"));
     }
 
@@ -420,11 +415,7 @@ async fn order_for(state: &AppState, code: &str, phone_raw: &str) -> AppResult<d
     db::orders::order_by_code_and_phone(&state.pool, &normalise_code(code), &phone).await?.ok_or_else(AppError::not_found)
 }
 
-pub async fn lookup_order(
-    State(state): State<AppState>,
-    ClientIp(ip): ClientIp,
-    Json(req): Json<OrderLookupRequest>,
-) -> AppResult<Json<OrderPublicDto>> {
+pub async fn lookup_order(State(state): State<AppState>, ClientIp(ip): ClientIp, Json(req): Json<OrderLookupRequest>) -> AppResult<Json<OrderPublicDto>> {
     // Tight limit: this endpoint is the one that could be used to guess codes.
     rate_limit(&state, "lookup", &ip, 600, 20).await?;
     let row = order_for(&state, &req.code, &req.phone).await?;
@@ -499,7 +490,12 @@ pub async fn telegram_me(State(state): State<AppState>, ClientIp(ip): ClientIp, 
         orders: orders
             .iter()
             .filter_map(|o| {
-                Some(OrderSummaryDto { code: o.code.clone(), status: OrderStatus::parse(&o.status)?, created_at: db::ts(o.created_at), total: Tiyin(o.total_tiyin) })
+                Some(OrderSummaryDto {
+                    code: o.code.clone(),
+                    status: OrderStatus::parse(&o.status)?,
+                    created_at: db::ts(o.created_at),
+                    total: Tiyin(o.total_tiyin),
+                })
             })
             .collect(),
     }))

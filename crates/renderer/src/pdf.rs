@@ -59,7 +59,7 @@ pub fn single_image_pdf(rgb: &[u8], width: u32, height: u32, page_w_pt: f32, pag
     let _ = write!(tail, "xref\n0 {}\n0000000000 65535 f \n", offsets.len() + 1);
     for off in &offsets {
         // Each xref entry is exactly 20 bytes: 10-digit offset, generation, flag.
-        let _ = write!(tail, "{off:010} 00000 n \n");
+        let _ = writeln!(tail, "{off:010} 00000 n ");
     }
     let _ = write!(tail, "trailer\n<< /Size {} /Root 1 0 R >>\nstartxref\n{xref_at}\n%%EOF\n", offsets.len() + 1);
     out.extend_from_slice(tail.as_bytes());

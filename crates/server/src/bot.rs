@@ -122,9 +122,8 @@ async fn handle_message(bot: Bot, msg: Message, state: AppState) -> HandlerResul
         Some(Command::Start) => {
             let detected = Lang::detect(from.language_code.as_deref().unwrap_or("uz"));
             db::orders::upsert_telegram_user(&state.pool, tg_id, Some(chat.0), Some(&from.first_name), detected.code()).await?;
-            let keyboard = KeyboardMarkup::new([[KeyboardButton::new(t(lang, "bot.share_phone")).request(ButtonRequest::Contact)]])
-                .resize_keyboard()
-                .one_time_keyboard();
+            let keyboard =
+                KeyboardMarkup::new([[KeyboardButton::new(t(lang, "bot.share_phone")).request(ButtonRequest::Contact)]]).resize_keyboard().one_time_keyboard();
             bot.send_message(chat, tf(lang, "bot.start", &[("brand", &state.cfg.brand)])).reply_markup(keyboard).await?;
             // Mini Apps must be served over HTTPS; skip the button in local dev.
             if state.cfg.public_base_url.starts_with("https://") {

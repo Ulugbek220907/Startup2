@@ -14,18 +14,11 @@ pub enum OrderStatus {
 }
 
 impl OrderStatus {
-    pub const ALL: [OrderStatus; 6] = [
-        OrderStatus::New,
-        OrderStatus::Confirmed,
-        OrderStatus::InProduction,
-        OrderStatus::Ready,
-        OrderStatus::Delivered,
-        OrderStatus::Cancelled,
-    ];
+    pub const ALL: [OrderStatus; 6] =
+        [OrderStatus::New, OrderStatus::Confirmed, OrderStatus::InProduction, OrderStatus::Ready, OrderStatus::Delivered, OrderStatus::Cancelled];
 
     /// The happy path, in order, for the customer's progress view.
-    pub const FLOW: [OrderStatus; 5] =
-        [OrderStatus::New, OrderStatus::Confirmed, OrderStatus::InProduction, OrderStatus::Ready, OrderStatus::Delivered];
+    pub const FLOW: [OrderStatus; 5] = [OrderStatus::New, OrderStatus::Confirmed, OrderStatus::InProduction, OrderStatus::Ready, OrderStatus::Delivered];
 
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -109,7 +102,10 @@ impl ModerationStatus {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TransitionError {
-    NotAllowed { from: OrderStatus, to: OrderStatus },
+    NotAllowed {
+        from: OrderStatus,
+        to: OrderStatus,
+    },
     /// The design has not passed moderation, so it cannot be produced.
     NeedsModeration,
 }
@@ -191,10 +187,7 @@ mod tests {
     #[test]
     fn production_requires_moderation() {
         for m in [ModerationStatus::Pending, ModerationStatus::Flagged, ModerationStatus::Rejected] {
-            assert_eq!(
-                check_transition(OrderStatus::Confirmed, OrderStatus::InProduction, m),
-                Err(TransitionError::NeedsModeration)
-            );
+            assert_eq!(check_transition(OrderStatus::Confirmed, OrderStatus::InProduction, m), Err(TransitionError::NeedsModeration));
             // Confirming or cancelling is still possible.
             assert!(check_transition(OrderStatus::New, OrderStatus::Confirmed, m).is_ok());
             assert!(check_transition(OrderStatus::Confirmed, OrderStatus::Cancelled, m).is_ok());

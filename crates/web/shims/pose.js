@@ -20,6 +20,9 @@ const landmarks = new Float32Array(33 * 3);
 let mask = new Uint8Array(0);
 let maskW = 0;
 let maskH = 0;
+// Reading the mask back from the GPU costs a few milliseconds per frame, so
+// it is only done while Rust says an arm is in front of the body.
+let wantMask = false;
 
 async function fetchWithProgress(url, onProgress, from, to) {
   const res = await fetch(url);
@@ -115,7 +118,7 @@ export function poseDetect(video, timestampMs) {
       landmarks[i * 3 + 2] = p.visibility === undefined ? 1 : p.visibility;
     }
     const m = result.segmentationMasks && result.segmentationMasks[0];
-    if (m) {
+    if (m && wantMask) {
       const f = m.getAsFloat32Array();
       if (mask.length !== f.length) mask = new Uint8Array(f.length);
       for (let i = 0; i < f.length; i++) mask[i] = f[i] * 255;
@@ -126,6 +129,8 @@ export function poseDetect(video, timestampMs) {
   return found;
 }
 
+/** Ask for (or stop asking for) the segmentation mask on later frames. */
+export function poseWantMask(on) { wantMask = !!on; }
 export function poseLandmarks() { return landmarks; }
 export function poseMask() { return mask; }
 export function poseMaskWidth() { return maskW; }

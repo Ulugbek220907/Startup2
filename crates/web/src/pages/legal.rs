@@ -15,7 +15,9 @@ fn download_json(name: &str, json: &str) {
     opts.set_type("application/json");
     let Ok(blob) = web_sys::Blob::new_with_str_sequence_and_options(&parts, &opts) else { return };
     let Ok(url) = web_sys::Url::create_object_url_with_blob(&blob) else { return };
-    if let Some(a) = web_sys::window().and_then(|w| w.document()).and_then(|d| d.create_element("a").ok()).and_then(|e| e.dyn_into::<web_sys::HtmlAnchorElement>().ok()) {
+    if let Some(a) =
+        web_sys::window().and_then(|w| w.document()).and_then(|d| d.create_element("a").ok()).and_then(|e| e.dyn_into::<web_sys::HtmlAnchorElement>().ok())
+    {
         a.set_href(&url);
         a.set_download(name);
         a.click();

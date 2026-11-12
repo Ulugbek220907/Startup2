@@ -405,7 +405,18 @@ pub fn EditorPage(garment: Option<String>, shared: Option<String>) -> impl IntoV
             if let Some(stroke) = live.clone() {
                 layers.push(Layer::new("live", 0.0, 0.0, LayerKind::Draw(DrawLayer { strokes: vec![stroke] })));
             }
-            draw::draw_mockup(&c, css_w, scale, &view, garment.kind, side, color, Some(&area), &layers, &MockupOpts { show_area: true, background: Some("#2b2d34") });
+            draw::draw_mockup(
+                &c,
+                css_w,
+                scale,
+                &view,
+                garment.kind,
+                side,
+                color,
+                Some(&area),
+                &layers,
+                &MockupOpts { show_area: true, background: Some("#2b2d34") },
+            );
 
             // Selection frame and handles, drawn in CSS-pixel space.
             if let Some(layer) = selected.as_ref().and_then(|id| doc.layers(side).iter().find(|l| l.id == *id)) {
@@ -607,7 +618,8 @@ pub fn EditorPage(garment: Option<String>, shared: Option<String>) -> impl IntoV
     let add_text = move |_| {
         ed.set_tool(Tool::None);
         let Some(area) = ed.area_untracked() else { return };
-        let garment_color = ctx.garment().and_then(|g| ctx.draft.with_untracked(|d| d.doc.as_ref().and_then(|doc| g.color(&doc.color).and_then(|c| Color::parse(&c.hex)))));
+        let garment_color =
+            ctx.garment().and_then(|g| ctx.draft.with_untracked(|d| d.doc.as_ref().and_then(|doc| g.color(&doc.color).and_then(|c| Color::parse(&c.hex)))));
         let kind = LayerKind::Text(TextLayer {
             text: t("editor.text_default").to_string(),
             font: FontId::Montserrat,
@@ -951,10 +963,12 @@ fn LayerPanel(ed: Ed, layer: Memo<Option<Layer>>) -> impl IntoView {
         Some(LayerKind::Sticker(_)) => 4,
         _ => 0,
     });
-    let text = move || layer.with(|l| match l.as_ref().map(|l| &l.kind) {
-        Some(LayerKind::Text(t)) => Some(t.clone()),
-        _ => None,
-    });
+    let text = move || {
+        layer.with(|l| match l.as_ref().map(|l| &l.kind) {
+            Some(LayerKind::Text(t)) => Some(t.clone()),
+            _ => None,
+        })
+    };
     // Apply a change to the selected layer and record it for undo.
     let apply = move |f: Box<dyn FnOnce(&mut Layer)>| {
         ed.mutate_selected(f);

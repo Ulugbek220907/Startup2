@@ -16,12 +16,7 @@ pub struct StickerDef {
 
 pub const STICKERS: &[StickerDef] = &[
     StickerDef { id: "bolt", width: 100.0, height: 100.0, d: "M58 2 L18 56 H44 L36 98 L82 40 H54 Z" },
-    StickerDef {
-        id: "crown",
-        width: 100.0,
-        height: 100.0,
-        d: "M8 78 L4 26 L30 48 L50 12 L70 48 L96 26 L92 78 Z M8 84 H92 V94 H8 Z",
-    },
+    StickerDef { id: "crown", width: 100.0, height: 100.0, d: "M8 78 L4 26 L30 48 L50 12 L70 48 L96 26 L92 78 Z M8 84 H92 V94 H8 Z" },
     StickerDef {
         id: "flame",
         width: 100.0,
@@ -43,12 +38,7 @@ pub const STICKERS: &[StickerDef] = &[
         height: 100.0,
         d: "M62 4 C36 8 18 28 18 52 C18 76 38 96 62 96 C70 96 78 94 84 90 C62 88 46 72 46 50 C46 30 58 14 76 8 C72 5 67 4 62 4 Z",
     },
-    StickerDef {
-        id: "mountain",
-        width: 100.0,
-        height: 100.0,
-        d: "M2 90 L34 26 L50 54 L64 36 L98 90 Z M34 36 L27 50 L34 46 L41 52 Z",
-    },
+    StickerDef { id: "mountain", width: 100.0, height: 100.0, d: "M2 90 L34 26 L50 54 L64 36 L98 90 Z M34 36 L27 50 L34 46 L41 52 Z" },
     StickerDef { id: "diamond", width: 100.0, height: 100.0, d: "M20 10 H80 L98 38 L50 94 L2 38 Z M24 40 H76 L50 80 Z" },
     StickerDef { id: "arrow", width: 100.0, height: 100.0, d: "M4 40 H60 V18 L96 50 L60 82 V60 H4 Z" },
     StickerDef {
@@ -59,12 +49,7 @@ pub const STICKERS: &[StickerDef] = &[
             M46 4 H54 L52 20 H48 Z M46 96 H54 L52 80 H48 Z M4 46 V54 L20 52 V48 Z M96 46 V54 L80 52 V48 Z \
             M16 21 L21 16 L33 29 L29 33 Z M84 21 L79 16 L67 29 L71 33 Z M16 79 L21 84 L33 71 L29 67 Z M84 79 L79 84 L67 71 L71 67 Z",
     },
-    StickerDef {
-        id: "bubble",
-        width: 100.0,
-        height: 100.0,
-        d: "M10 10 H90 Q96 10 96 16 V62 Q96 68 90 68 H46 L26 90 V68 H10 Q4 68 4 62 V16 Q4 10 10 10 Z",
-    },
+    StickerDef { id: "bubble", width: 100.0, height: 100.0, d: "M10 10 H90 Q96 10 96 16 V62 Q96 68 90 68 H46 L26 90 V68 H10 Q4 68 4 62 V16 Q4 10 10 10 Z" },
 ];
 
 pub fn find(id: &str) -> Option<&'static StickerDef> {

@@ -22,8 +22,7 @@ pub enum FontId {
 }
 
 impl FontId {
-    pub const ALL: [FontId; 6] =
-        [FontId::Montserrat, FontId::Oswald, FontId::NotoSerif, FontId::Caveat, FontId::Pacifico, FontId::RubikMono];
+    pub const ALL: [FontId; 6] = [FontId::Montserrat, FontId::Oswald, FontId::NotoSerif, FontId::Caveat, FontId::Pacifico, FontId::RubikMono];
 
     /// File name under `/fonts/` (web) and `crates/design/fonts/` (server).
     pub fn file_name(&self) -> &'static str {
