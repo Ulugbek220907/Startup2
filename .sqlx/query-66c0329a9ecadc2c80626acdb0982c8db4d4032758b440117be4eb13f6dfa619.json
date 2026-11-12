@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM price_tiers",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "66c0329a9ecadc2c80626acdb0982c8db4d4032758b440117be4eb13f6dfa619"
+}

@@ -1,0 +1,18 @@
+[package]
+name = "storage"
+description = "Object storage abstraction: S3-compatible (MinIO, Cloudflare R2), local directory, in-memory"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+bytes.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+object_store = { version = "0.14", default-features = false, features = ["aws"] }
+futures = { version = "0.3", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

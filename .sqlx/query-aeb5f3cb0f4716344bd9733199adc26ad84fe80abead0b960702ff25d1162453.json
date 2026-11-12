@@ -1,0 +1,110 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT garment_id, side, width_cm, height_cm, mock_x, mock_y, mock_w, mock_h FROM print_areas ORDER BY side DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "garment_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "garment_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "side",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "side"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "width_cm",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "width_cm"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "height_cm",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "height_cm"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "mock_x",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "mock_x"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "mock_y",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "mock_y"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "mock_w",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "mock_w"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "mock_h",
+        "type_info": "Float4",
+        "origin": {
+          "Table": {
+            "table": "print_areas",
+            "name": "mock_h"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "aeb5f3cb0f4716344bd9733199adc26ad84fe80abead0b960702ff25d1162453"
+}

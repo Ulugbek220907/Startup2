@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE designs SET\n            moderation_status = CASE\n                WHEN moderation_status IN ('approved', 'rejected', 'flagged') THEN moderation_status\n                WHEN $2 THEN 'flagged' ELSE 'clean' END,\n            moderation_reason = CASE\n                WHEN moderation_status IN ('approved', 'rejected', 'flagged') THEN moderation_reason\n                ELSE $3 END\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "81c7ce2365afa4e9ad5e5cfba33167e58c5963eaa98ada2c2b521544df3f469a"
+}

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customers (phone, name, lang) VALUES ($1, $2, $3)\n         ON CONFLICT (phone) DO UPDATE SET name = COALESCE(EXCLUDED.name, customers.name), lang = EXCLUDED.lang\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5b9a9fa9ae4e0e0ae8b6186fd5a9a1e3dea7cde58eb7d0dda756c6d17316394a"
+}

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customers (telegram_id, telegram_chat_id, name, lang) VALUES ($1, $2, $3, $4)\n         ON CONFLICT (telegram_id) DO UPDATE SET\n            telegram_chat_id = COALESCE(EXCLUDED.telegram_chat_id, customers.telegram_chat_id),\n            name = COALESCE(customers.name, EXCLUDED.name)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "05111f0e8ff87f38fd4bbde0cba65fbbbad7ef87f330dbf1cd8651fb59e91d47"
+}

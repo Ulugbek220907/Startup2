@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a.id, a.mime, a.width, a.height, a.storage_key, a.preview_key FROM assets a\n         WHERE a.created_at < now() - make_interval(days => $1)\n           AND NOT EXISTS (SELECT 1 FROM designs d WHERE d.doc::text LIKE '%' || a.id::text || '%')\n           AND NOT EXISTS (SELECT 1 FROM order_items i WHERE i.design_doc::text LIKE '%' || a.id::text || '%')\n         LIMIT 500",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "mime",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "mime"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "width",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "width"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "height",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "height"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "storage_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "storage_key"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "preview_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "assets",
+            "name": "preview_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6c0466a2138846ade481d3724127f7cff9738844f8814263e2d037cf31cc1d85"
+}

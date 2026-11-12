@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO order_files (order_id, kind, storage_key, mime, bytes) VALUES ($1, $2, $3, $4, $5)\n         ON CONFLICT (order_id, kind) DO UPDATE SET storage_key = EXCLUDED.storage_key, mime = EXCLUDED.mime,\n            bytes = EXCLUDED.bytes, created_at = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "52bca885b76854367fb05c68fe47079152e03a94c7fcf19cc516a0f9981a0258"
+}

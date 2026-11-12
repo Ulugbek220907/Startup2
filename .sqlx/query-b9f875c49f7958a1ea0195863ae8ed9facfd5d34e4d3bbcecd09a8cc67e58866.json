@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tryon_jobs SET status = 'done', result_key = $2, result_mime = $3, cost_tiyin = $4, finished_at = now()\n         WHERE id = $1 AND status = 'running'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9f875c49f7958a1ea0195863ae8ed9facfd5d34e4d3bbcecd09a8cc67e58866"
+}

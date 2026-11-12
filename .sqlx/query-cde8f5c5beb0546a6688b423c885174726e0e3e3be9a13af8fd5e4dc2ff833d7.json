@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE regions SET delivery_fee_tiyin = $2 WHERE slug = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cde8f5c5beb0546a6688b423c885174726e0e3e3be9a13af8fd5e4dc2ff833d7"
+}

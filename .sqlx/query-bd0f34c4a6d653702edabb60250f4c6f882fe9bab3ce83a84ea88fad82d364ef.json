@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT slug, name_uz, name_ru, name_en, delivery_fee_tiyin FROM regions WHERE active ORDER BY sort, slug",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "regions",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name_uz",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "regions",
+            "name": "name_uz"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name_ru",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "regions",
+            "name": "name_ru"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "name_en",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "regions",
+            "name": "name_en"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "delivery_fee_tiyin",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "regions",
+            "name": "delivery_fee_tiyin"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bd0f34c4a6d653702edabb60250f4c6f882fe9bab3ce83a84ea88fad82d364ef"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO order_status_log (order_id, from_status, to_status, actor) VALUES ($1, NULL, 'new', 'customer')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "572dce36184a63d9d332c3311ddda297a6411deb49111422c5c86894e313b7fa"
+}

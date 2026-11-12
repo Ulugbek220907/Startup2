@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET telegram_id = NULL, telegram_chat_id = NULL WHERE telegram_id = $1 AND id <> $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4a46c39a0064dee8be7ee8b4d2d5ca1d8da1270ce0e5b8c57ca912c7d155e08d"
+}

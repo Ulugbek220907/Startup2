@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO price_tiers (max_area_cm2, price_tiyin) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2a964b5e07b52fbdd8fde498cc62382b969b7134c4d01b256246fe08642ab101"
+}

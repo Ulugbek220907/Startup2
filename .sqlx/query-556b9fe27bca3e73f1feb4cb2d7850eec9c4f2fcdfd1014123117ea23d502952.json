@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE print_areas p SET width_cm = $3, height_cm = $4, mock_x = $5, mock_y = $6, mock_w = $7, mock_h = $8\n         FROM garments g WHERE g.id = p.garment_id AND g.slug = $1 AND p.side = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "556b9fe27bca3e73f1feb4cb2d7850eec9c4f2fcdfd1014123117ea23d502952"
+}

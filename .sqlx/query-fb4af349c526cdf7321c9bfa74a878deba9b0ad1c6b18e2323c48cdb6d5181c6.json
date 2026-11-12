@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE designs SET moderation_status = 'flagged', moderation_reason = $2 WHERE id = $1 AND moderation_status <> 'rejected'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fb4af349c526cdf7321c9bfa74a878deba9b0ad1c6b18e2323c48cdb6d5181c6"
+}

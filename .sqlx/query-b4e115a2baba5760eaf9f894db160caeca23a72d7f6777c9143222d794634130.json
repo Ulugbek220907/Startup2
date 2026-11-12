@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE designs SET doc = $3, garment_slug = $4, updated_at = now(),\n                moderation_status = CASE WHEN moderation_status = 'rejected' THEN 'rejected' ELSE 'pending' END\n         WHERE slug = $1 AND edit_token_hash = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b4e115a2baba5760eaf9f894db160caeca23a72d7f6777c9143222d794634130"
+}

@@ -1,0 +1,149 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, device_id, photo_key, garment_key, result_key, result_mime, provider, status, error, cache_key, expires_at\n         FROM tryon_jobs\n         WHERE cache_key = $1 AND device_id = $2 AND status = 'done' AND expires_at > now()\n         ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "device_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "device_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "photo_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "photo_key"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "garment_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "garment_key"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "result_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "result_key"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "result_mime",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "result_mime"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "provider",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "provider"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "error"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "cache_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "cache_key"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "70744a114e1bf64f9d74f9b27644591381ab7b2e7f1094105e2041f0b494cecf"
+}

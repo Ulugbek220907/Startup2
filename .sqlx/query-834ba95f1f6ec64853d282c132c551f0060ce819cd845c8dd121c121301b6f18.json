@@ -1,0 +1,110 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.slug, d.doc, d.moderation_status, d.moderation_reason, d.created_at,\n                  o.id AS \"order_id?\", o.code AS \"order_code?\"\n           FROM designs d\n           LEFT JOIN LATERAL (\n               SELECT o.id, o.code FROM order_items i JOIN orders o ON o.id = i.order_id\n               WHERE i.design_id = d.id ORDER BY o.created_at DESC LIMIT 1\n           ) o ON TRUE\n           WHERE d.moderation_status = 'flagged'\n           ORDER BY d.updated_at DESC LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "doc",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "doc"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "moderation_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "moderation_status"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "moderation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "moderation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "order_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "order_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "834ba95f1f6ec64853d282c132c551f0060ce819cd845c8dd121c121301b6f18"
+}

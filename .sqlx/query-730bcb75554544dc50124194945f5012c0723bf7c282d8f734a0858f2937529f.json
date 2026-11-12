@@ -1,0 +1,112 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, slug, edit_token_hash, doc, garment_slug, moderation_status, moderation_reason, created_at FROM designs WHERE slug = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "edit_token_hash",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "edit_token_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "doc",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "doc"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "garment_slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "garment_slug"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "moderation_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "moderation_status"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "moderation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "moderation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "designs",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "730bcb75554544dc50124194945f5012c0723bf7c282d8f734a0858f2937529f"
+}

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\",\n                  COALESCE(sum(CASE WHEN status IN ('queued', 'running') THEN $1::bigint ELSE cost_tiyin END), 0)::bigint AS \"cost!\"\n           FROM tryon_jobs WHERE created_at >= date_trunc('day', now())",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "cost!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "caeb7cca088065307bafbebc90bd2ed96ca837020f151e836a5d647d4b720188"
+}

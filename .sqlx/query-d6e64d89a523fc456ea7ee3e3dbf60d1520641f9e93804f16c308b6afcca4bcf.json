@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tryon_jobs SET status = 'running' WHERE id = $1 AND status IN ('queued', 'running')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d6e64d89a523fc456ea7ee3e3dbf60d1520641f9e93804f16c308b6afcca4bcf"
+}

@@ -1,0 +1,26 @@
+[package]
+name = "providers"
+description = "Third-party integrations behind traits, each with a working local mock"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+domain.workspace = true
+async-trait.workspace = true
+bytes.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "json", "http2"] }
+base64 = "0.23"
+sha2 = "0.11"
+hex = "0.4"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+axum = "0.8.9"

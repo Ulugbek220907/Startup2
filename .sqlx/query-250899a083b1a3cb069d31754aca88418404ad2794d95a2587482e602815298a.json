@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM designs d\n         WHERE d.updated_at < now() - make_interval(days => $1)\n           AND NOT EXISTS (SELECT 1 FROM order_items i WHERE i.design_id = d.id)\n           AND NOT EXISTS (SELECT 1 FROM design_reports r WHERE r.design_id = d.id AND r.status = 'open')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "250899a083b1a3cb069d31754aca88418404ad2794d95a2587482e602815298a"
+}

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customers (phone, telegram_id, telegram_chat_id, lang) VALUES ($1, $2, $3, $4)\n                 ON CONFLICT (telegram_id) DO UPDATE SET phone = EXCLUDED.phone, telegram_chat_id = EXCLUDED.telegram_chat_id",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6fc608dd7cb9f5e1649de8608f752ff2042bdcdcd2562dc7a0f29c32e4ccf966"
+}

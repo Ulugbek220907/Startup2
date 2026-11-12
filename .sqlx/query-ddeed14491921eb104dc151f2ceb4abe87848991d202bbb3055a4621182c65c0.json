@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM quantity_discounts",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "ddeed14491921eb104dc151f2ceb4abe87848991d202bbb3055a4621182c65c0"
+}

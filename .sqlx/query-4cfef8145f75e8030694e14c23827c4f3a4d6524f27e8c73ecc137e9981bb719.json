@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM blocklist_terms",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "4cfef8145f75e8030694e14c23827c4f3a4d6524f27e8c73ecc137e9981bb719"
+}

@@ -1,0 +1,48 @@
+[package]
+name = "server"
+description = "The single backend binary: HTTP API, static web app, background workers and Telegram bot"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "qiyiq-server"
+path = "src/main.rs"
+
+[dependencies]
+design = { workspace = true, features = ["embed-fonts"] }
+domain.workspace = true
+renderer.workspace = true
+storage.workspace = true
+providers.workspace = true
+db.workspace = true
+
+anyhow.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+async-trait.workspace = true
+tracing.workspace = true
+bytes.workspace = true
+
+axum = { version = "0.8.9", default-features = false, features = ["http1", "http2", "json", "query", "tokio", "macros"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.7.1", features = ["trace", "cors", "compression-gzip", "compression-br", "fs", "limit", "request-id", "timeout", "set-header", "catch-panic"] }
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+argon2 = "0.6.0"
+getrandom = "0.3"
+hmac = "0.13"
+sha2 = "0.11"
+hex = "0.4"
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }
+teloxide = { version = "0.17.0", default-features = false, features = ["macros", "rustls", "ctrlc_handler"] }
+percent-encoding = "2"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+http-body-util = "0.1"
+testcontainers = "0.28.0"

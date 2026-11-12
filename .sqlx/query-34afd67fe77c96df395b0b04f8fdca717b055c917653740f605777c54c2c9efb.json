@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT min_qty, percent_bp FROM quantity_discounts ORDER BY min_qty",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "min_qty",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "quantity_discounts",
+            "name": "min_qty"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "percent_bp",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "quantity_discounts",
+            "name": "percent_bp"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "34afd67fe77c96df395b0b04f8fdca717b055c917653740f605777c54c2c9efb"
+}

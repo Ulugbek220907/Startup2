@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT max_area_cm2, price_tiyin FROM price_tiers ORDER BY max_area_cm2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_area_cm2",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "price_tiers",
+            "name": "max_area_cm2"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "price_tiyin",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "price_tiers",
+            "name": "price_tiyin"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "92e514f1121da09aa01e013e7b92bd988b9df795954d511b71254830ca0113b0"
+}

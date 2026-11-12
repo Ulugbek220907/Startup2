@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE designs SET moderation_status = $2, moderation_reason = COALESCE($3, moderation_reason) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "426c3125537bb4719bfe105a8e3eb99f82a69f31f91a0327ce3095f190c03c98"
+}

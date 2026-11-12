@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tryon_jobs t SET status = 'deleted', photo_key = NULL, garment_key = NULL, result_key = NULL\n         FROM (SELECT id, photo_key, garment_key, result_key FROM tryon_jobs WHERE id = $1 FOR UPDATE) old\n         WHERE t.id = old.id\n         RETURNING old.photo_key, old.garment_key, old.result_key",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "photo_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "photo_key"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "garment_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "garment_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "result_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tryon_jobs",
+            "name": "result_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "e98edaaa471bc483181ec48308645f88747c325b3d06f77084a8d6624453bde2"
+}
