@@ -37,6 +37,18 @@ First complete version of the v1 scope.
   Caddy config, Capacitor Android and iOS projects, four GitHub Actions
   workflows, runbooks.
 
+### Render hosting
+- `render.yaml` blueprint (web service + PostgreSQL 16 + disk) and
+  `docs/RENDER.md`.
+- The server listens on `PORT` when `BIND_ADDR` is unset and takes its
+  public address from `RENDER_EXTERNAL_URL` when `PUBLIC_BASE_URL` is unset.
+- `CLIENT_IP_HEADER` for hosts whose edge provides the client address in a
+  dedicated header.
+- The Docker build downloads checksum-verified `trunk` and `wasm-bindgen`
+  binaries instead of compiling them, and accepts `RUN_AS` to choose the
+  container user.
+- The VPS deploy workflow only runs when `DEPLOY_TARGET=vps`.
+
 ### Design changes from the supplied Stitch screens
 - Text sizes raised: 17 px body, nothing under 14 px, 48 px minimum tap
   targets; labels that overflowed their pills were removed or shortened.

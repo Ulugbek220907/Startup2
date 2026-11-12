@@ -59,7 +59,7 @@ against your computer, use an HTTPS tunnel or deploy.
 
 Built and verified here:
 
-- Backend, renderer and business rules: **128 automated tests**, including
+- Backend, renderer and business rules: **129 automated tests**, including
   property tests for money and pricing, golden-image tests for mockups,
   print files and the production sheet, and integration tests against real
   PostgreSQL (orders, admin, moderation, privacy, try-on with the mock,
@@ -86,6 +86,7 @@ Built and verified here:
 | Telegram bot | Compiles; commands and message formatting are unit-tested; initData verification is tested. Never connected to Telegram (no token). |
 | Android and iOS builds | Projects generated and configured, never compiled (no Android SDK or Xcode here). |
 | GitHub Actions workflows | Written, YAML-valid, **never run**. Action versions could not be checked from the build environment. See `docs/VERSIONS.md`. |
+| Render deployment | `render.yaml` written from Render's docs; the image was run locally the way Render runs it. Never applied to a Render account. See `docs/RENDER.md`. |
 | Signed store builds from a tag | Depends on the two rows above plus your keystore and Apple account. Expect fixes on first run. |
 | `docker compose up --build` exactly as written | The image was built from this Dockerfile and the compose stack (app + PostgreSQL + MinIO) was started and passed the browser test, **but** the build environment's network proxy required a temporary Dockerfile variant that trusts its certificate, and the image was built separately and then started with `--no-build`. The unmodified one-command path has not been run on a normal machine. |
 | Image moderation | No real provider. Text blocklist + manual review; see ADR 0011. |
@@ -262,6 +263,7 @@ cargo run -p evalkit -- --self-test
 
 | | |
 |---|---|
+| [docs/RENDER.md](docs/RENDER.md) | Hosting on Render with the included blueprint (`render.yaml`) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Deploying to a VPS, backups and restore, storage lifecycle, monitoring, routine tasks |
 | [docs/SECRETS.md](docs/SECRETS.md) | Every secret, Android keystore, Play Console, Apple setup, release checklist |
 | [docs/MOBILE.md](docs/MOBILE.md) | Building and configuring the Android and iOS apps |
