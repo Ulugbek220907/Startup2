@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
-members = ["crates/design", "crates/domain", "crates/renderer", "crates/storage", "crates/providers", "crates/db", "crates/server"]
+members = ["crates/design", "crates/domain", "crates/renderer", "crates/storage", "crates/providers", "crates/db", "crates/server", "crates/web"]
 # `web` only makes sense for wasm32; plain `cargo build/test` skips it.
-default-members = ["crates/design", "crates/domain", "crates/renderer", "crates/storage", "crates/providers", "crates/db", "crates/server"]
+default-members = ["crates/design", "crates/domain", "crates/renderer", "crates/storage", "crates/providers", "crates/db", "crates/server", "crates/web"]
 
 [workspace.package]
 version = "0.1.0"

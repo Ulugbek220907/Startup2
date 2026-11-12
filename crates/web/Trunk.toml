@@ -1,0 +1,18 @@
+# Build the customer app:  trunk build --release
+# Build the admin page:    trunk build --release --config Trunk.admin.toml
+# (scripts/build-web.sh runs both.)
+[build]
+target = "index.html"
+dist = "dist"
+public_url = "/"
+filehash = true
+minify = "on_release"
+
+[watch]
+ignore = ["dist", "public/vendor"]
+
+[serve]
+port = 8081
+# During development the API runs on :8080.
+[[proxy]]
+backend = "http://127.0.0.1:8080/api/"

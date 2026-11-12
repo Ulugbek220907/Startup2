@@ -1,0 +1,6 @@
+[build]
+target = "admin/index.html"
+dist = "dist/admin"
+public_url = "/admin/"
+filehash = true
+minify = "on_release"

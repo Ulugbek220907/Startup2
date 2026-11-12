@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0e11">
+  <meta name="color-scheme" content="dark">
+  <title>QiyiqDoʻppi</title>
+  <meta name="description" content="Kiyimga oʻz dizayningizni tushiring va buyurtma berishdan oldin kiyib koʻring.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="preload" href="/ui-montserrat.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link data-trunk rel="css" href="styles.css">
+  <link data-trunk rel="copy-file" href="public/ui-montserrat.woff2">
+  <link data-trunk rel="copy-file" href="public/manifest.webmanifest">
+  <link data-trunk rel="copy-file" href="public/sw.js">
+  <link data-trunk rel="copy-file" href="public/config.js">
+  <link data-trunk rel="copy-dir" href="public/icons">
+  <link data-trunk rel="copy-dir" href="public/vendor">
+  <link data-trunk rel="copy-dir" href="../design/fonts" data-target-path="fonts">
+  <link data-trunk rel="rust" data-bin="app" data-cargo-profile-release="wasm-release" data-wasm-opt="z" data-wasm-opt-params="--enable-bulk-memory --enable-bulk-memory-opt --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue">
+
+  <!-- Runtime settings (API address for the mobile apps). Separate file so
+       it can be replaced at deploy time without rebuilding. -->
+  <script src="/config.js"></script>
+</head>
+<body>
+  <noscript>JavaScript kerak. / Нужен JavaScript. / JavaScript is required.</noscript>
+  <!-- Shown until the WASM app mounts and replaces it. -->
+  <div id="boot" class="boot"><div class="boot-mark"></div></div>
+</body>
+</html>
