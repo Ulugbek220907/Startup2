@@ -7,8 +7,28 @@ use std::time::Duration;
 use server::config::Config;
 use tracing_subscriber::EnvFilter;
 
+/// `qiyiq-server healthcheck`: exit 0 if the local server answers
+/// `/healthz`. Used by the Docker HEALTHCHECK, so the image needs no curl.
+fn healthcheck() -> ! {
+    use std::io::{Read, Write};
+    let port = std::env::var("BIND_ADDR").ok().and_then(|a| a.rsplit(':').next().and_then(|p| p.parse::<u16>().ok())).unwrap_or(8080);
+    let ok = std::net::TcpStream::connect(("127.0.0.1", port))
+        .and_then(|mut s| {
+            s.set_read_timeout(Some(Duration::from_secs(3)))?;
+            s.write_all(b"GET /healthz HTTP/1.0\r\nHost: localhost\r\n\r\n")?;
+            let mut buf = [0u8; 64];
+            let n = s.read(&mut buf)?;
+            Ok(buf[..n].windows(3).any(|w| w == b"200"))
+        })
+        .unwrap_or(false);
+    std::process::exit(if ok { 0 } else { 1 })
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    if std::env::args().nth(1).as_deref() == Some("healthcheck") {
+        healthcheck();
+    }
     let cfg = Config::from_env().map_err(|e| anyhow::anyhow!("configuration error: {e}"))?;
 
     // Structured JSON logs in production, readable text in development.
@@ -51,6 +71,12 @@ async fn main() -> anyhow::Result<()> {
     );
     if !std::path::Path::new(&state.cfg.static_dir).join("index.html").exists() {
         tracing::warn!(dir = %state.cfg.static_dir, "web app build not found; serving the API only");
+    }
+
+    if std::env::var("SEED_DEMO").is_ok_and(|v| v == "true" || v == "1") {
+        if let Err(e) = server::seed_demo(&state).await {
+            tracing::warn!(error = %e, "demo seed failed");
+        }
     }
 
     server::worker::spawn(state.clone());

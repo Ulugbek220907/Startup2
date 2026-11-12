@@ -5,7 +5,7 @@
 #   scripts/build-web.sh --dev      faster debug build
 #
 # Needs: trunk (cargo install trunk --locked), the wasm32 target
-# (rustup target add wasm32-unknown-unknown), npm and curl for the vendor step.
+# (rustup target add wasm32-unknown-unknown) and curl for the vendor step.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="--release"

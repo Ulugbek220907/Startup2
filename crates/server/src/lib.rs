@@ -108,6 +108,38 @@ pub async fn bootstrap_admin(state: &AppState) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Create one example order on an empty database (`SEED_DEMO=true`), so the
+/// admin page has something to show right after `docker compose up`. It
+/// goes through the same code path as a real order.
+pub async fn seed_demo(state: &AppState) -> anyhow::Result<()> {
+    use axum::extract::State;
+    use domain::api::{CreateOrderRequest, DeliveryChoice};
+    let existing: i64 = db::sqlx::query_scalar("SELECT count(*) FROM orders").fetch_one(&state.pool).await?;
+    if existing > 0 {
+        return Ok(());
+    }
+    let mut doc = design::DesignDoc::new("hoodie", "black");
+    doc.front = design::templates::find("city_arch").map(|t| t.layers(30.0, 35.0, design::Color::WHITE)).unwrap_or_default();
+    let req = CreateOrderRequest {
+        doc,
+        design_slug: None,
+        size: "L".into(),
+        quantity: 2,
+        phone: "+998901234567".into(),
+        customer_name: Some("Demo mijoz".into()),
+        delivery: DeliveryChoice { method: domain::order::DeliveryMethod::Delivery, region: Some("tashkent-city".into()) },
+        address: Some("Namuna koʻchasi 1 (demo buyurtma)".into()),
+        notes: Some("Bu namuna buyurtma. Oʻchirib tashlashingiz mumkin.".into()),
+        lang: domain::Lang::Uz,
+        accept_rights: true,
+    };
+    match routes::public::create_order(State(state.clone()), auth::ClientIp("seed".into()), axum::Json(req)).await {
+        Ok((_, axum::Json(order))) => tracing::info!(code = %order.code, "demo order created"),
+        Err(e) => anyhow::bail!("{}", e.message),
+    }
+    Ok(())
+}
+
 /// CSP `'sha256-…'` sources for the inline scripts in the built HTML. The
 /// bundler emits a small inline module that boots the WASM; hashing it at
 /// startup lets the policy forbid every other inline script.

@@ -1,0 +1,26 @@
+# Caddy obtains and renews the TLS certificate for the domain automatically.
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# Metrics are for the server operator only (read them over SSH:
+	# docker compose exec app ... or curl from the host network).
+	@private path /metrics
+	respond @private 404
+
+	reverse_proxy app:8080 {
+		# Uploads and print-file downloads can take a while on slow links.
+		transport http {
+			response_header_timeout 120s
+		}
+	}
+
+	# Largest accepted request: photo/artwork uploads (MAX_UPLOAD_MB) plus margin.
+	request_body {
+		max_size 60MB
+	}
+}
+
+# Redirect www to the bare domain.
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}

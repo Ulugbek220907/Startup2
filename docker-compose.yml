@@ -1,0 +1,79 @@
+# Local development and demo: everything with mock integrations, no API keys.
+#
+#   docker compose up --build
+#
+# then open http://localhost:8080 (app) and http://localhost:8080/admin/
+# (admin / admin-dev-password). MinIO console: http://localhost:9001.
+# These credentials are for local use only; production uses
+# deploy/docker-compose.prod.yml with values from a private .env file.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: qiyiq
+      POSTGRES_PASSWORD: qiyiq-dev
+      POSTGRES_DB: qiyiq
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qiyiq -d qiyiq"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: qiyiq-dev
+      MINIO_ROOT_PASSWORD: qiyiq-dev-secret
+    volumes:
+      - minio-data:/data
+    ports:
+      - "127.0.0.1:9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Creates the bucket once, then exits.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "mc alias set local http://minio:9000 qiyiq-dev qiyiq-dev-secret &&
+      mc mb --ignore-existing local/qiyiq"
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://qiyiq:qiyiq-dev@db:5432/qiyiq
+      PUBLIC_BASE_URL: http://localhost:8080
+      STORAGE_BACKEND: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: qiyiq
+      S3_ACCESS_KEY: qiyiq-dev
+      S3_SECRET_KEY: qiyiq-dev-secret
+      S3_PATH_STYLE: "true"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin-dev-password
+      SEED_DEMO: "true"
+      LOG_FORMAT: pretty
+      # Mock integrations are the defaults; listed here to make that visible.
+      TRYON_PROVIDER: mock
+      MODERATION_MOCK_MODE: allow_all
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
+  minio-data:

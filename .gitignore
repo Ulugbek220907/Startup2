@@ -19,3 +19,4 @@ eval/out/
 e2e/out/
 eval/photos/*
 !eval/photos/.gitkeep
+.sandbox-ca.crt

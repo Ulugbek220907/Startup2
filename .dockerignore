@@ -1,0 +1,13 @@
+target
+**/dist
+**/node_modules
+.git
+.env
+e2e/out
+eval/out
+eval/photos
+mobile/android
+mobile/ios
+crates/web/public/vendor
+*.keystore
+*.jks

@@ -30,7 +30,9 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 echo "fetching @mediapipe/tasks-vision@$TASKS_VISION_VERSION"
-(cd "$TMP" && npm pack --silent "@mediapipe/tasks-vision@$TASKS_VISION_VERSION" >/dev/null && tar -xzf mediapipe-tasks-vision-*.tgz)
+# Straight from the npm registry with curl, so the build needs no Node.js.
+curl -fsSL --retry 3 -o "$TMP/tv.tgz" "https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-$TASKS_VISION_VERSION.tgz"
+tar -xzf "$TMP/tv.tgz" -C "$TMP"
 cp "$TMP/package/vision_bundle.mjs" "$DEST/vision_bundle.mjs"
 cp "$TMP/package/wasm/vision_wasm_internal.js" "$TMP/package/wasm/vision_wasm_internal.wasm" "$DEST/wasm/"
 

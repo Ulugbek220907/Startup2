@@ -1,0 +1,62 @@
+# Single-VPS production stack: Caddy (automatic HTTPS) -> app -> Postgres.
+# Object storage is external (Cloudflare R2 or any S3-compatible service),
+# or the local disk if STORAGE_BACKEND=fs.
+#
+#   cd /opt/qiyiqdoppi && docker compose -f docker-compose.prod.yml --env-file .env up -d
+#
+# See docs/DEPLOY.md for the full runbook.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: qiyiq
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: qiyiq
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qiyiq -d qiyiq"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    image: ${APP_IMAGE:?set APP_IMAGE in .env, e.g. ghcr.io/owner/repo:1.0.0}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://qiyiq:${POSTGRES_PASSWORD}@db:5432/qiyiq
+      # Caddy is the only thing in front of the app, so its X-Forwarded-For
+      # can be trusted for rate limiting.
+      TRUST_PROXY: "true"
+    volumes:
+      - app-data:/data
+    # Not published: only Caddy can reach it.
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env, e.g. qiyiqdoppi.uz}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  db-data:
+  app-data:
+  caddy-data:
+  caddy-config:
