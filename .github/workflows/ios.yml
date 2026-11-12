@@ -1,0 +1,103 @@
+name: iOS
+
+# Pull requests: an unsigned simulator build (proves the project compiles).
+# Version tags (v1.2.3): signed archive, IPA, upload to TestFlight.
+on:
+  pull_request:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SQLX_OFFLINE: "true"
+  RUST_VERSION: "1.97.0"
+  QD_API_BASE: ${{ vars.QD_API_BASE || 'https://qiyiqdoppi.example' }}
+
+jobs:
+  build:
+    # macOS 26 runner; its default Xcode (26.x) is used.
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: trunk@0.22.1,wasm-bindgen-cli@0.2.130
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build web assets and sync them into the iOS project
+        run: scripts/build-mobile-web.sh
+
+      - name: Simulator build (unsigned)
+        if: github.ref_type != 'tag'
+        working-directory: mobile/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
+
+      - uses: ruby/setup-ruby@v1
+        if: github.ref_type == 'tag'
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: mobile/ios/App
+
+      - name: Decode the signing certificate and provisioning profile
+        if: github.ref_type == 'tag'
+        env:
+          IOS_CERTIFICATE_P12_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          if [ -z "$IOS_CERTIFICATE_P12_BASE64" ] || [ -z "$IOS_PROFILE_BASE64" ]; then
+            echo "::error::iOS signing secrets are not set (see docs/SECRETS.md)"; exit 1
+          fi
+          echo "$IOS_CERTIFICATE_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          echo "$IOS_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/dist.mobileprovision"
+
+      - name: Archive, export the IPA and upload to TestFlight
+        if: github.ref_type == 'tag'
+        working-directory: mobile/ios/App
+        env:
+          IOS_CERTIFICATE_PATH: ${{ runner.temp }}/dist.p12
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_PATH: ${{ runner.temp }}/dist.mobileprovision
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          export VERSION_NAME="${GITHUB_REF_NAME#v}"
+          bundle exec fastlane beta
+
+      - name: Remove signing files from the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/dist.p12" "$RUNNER_TEMP/dist.mobileprovision"
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref_type == 'tag'
+        with:
+          name: qiyiqdoppi-ipa
+          path: mobile/ios/App/build/QiyiqDoppi.ipa
+
+      - name: Attach the IPA to the GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mobile/ios/App/build/QiyiqDoppi.ipa

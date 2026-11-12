@@ -164,6 +164,14 @@ export async function startCamera(video, facing) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return "unavailable";
   stopCamera(video);
   try {
+    // In the apps, ask through the native permission dialog first. The
+    // WebView then gets the camera without a second, web-style prompt.
+    const c = cap();
+    if (c && c.Plugins && c.Plugins.Camera) {
+      let state = await c.Plugins.Camera.checkPermissions();
+      if (state.camera !== "granted") state = await c.Plugins.Camera.requestPermissions({ permissions: ["camera"] });
+      if (state.camera !== "granted" && state.camera !== "limited") return "denied";
+    }
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       // 640x480 keeps pose detection fast on low-end phones.
@@ -196,6 +204,57 @@ export function registerServiceWorker() {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => { /* offline support is optional */ });
   });
+}
+
+// ------------------------------------------------------------ native shell
+
+/**
+ * One-time setup inside the Android/iOS apps:
+ *  - deep links (qiyiqdoppi://d/<slug> and https://<site>/d/<slug>) are
+ *    turned into in-app navigation,
+ *  - the Android back button walks the app's history instead of closing it,
+ *  - the status bar matches the dark theme,
+ *  - push notifications are registered when enabled in config.js.
+ * Does nothing in a browser.
+ */
+export function initNative() {
+  const c = cap();
+  if (!c || !c.Plugins) return;
+  const { App, StatusBar, PushNotifications } = c.Plugins;
+  const openPath = (path) => {
+    history.pushState(null, "", path);
+    // The Rust router listens for popstate.
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+  if (App) {
+    App.addListener("appUrlOpen", (event) => {
+      try {
+        const url = new URL(event.url);
+        // qiyiqdoppi://d/abc parses as host "d", path "/abc".
+        const path = url.protocol === "qiyiqdoppi:" ? "/" + url.host + url.pathname : url.pathname;
+        if (/^\/(d|track)\/[A-Za-z0-9-]+$/.test(path)) openPath(path);
+      } catch (_) { /* ignore malformed links */ }
+    });
+    App.addListener("backButton", ({ canGoBack }) => {
+      if (canGoBack) history.back();
+      else App.exitApp();
+    });
+  }
+  if (StatusBar) {
+    StatusBar.setStyle({ style: "DARK" }).catch(() => {});
+    if (c.getPlatform() === "android") StatusBar.setBackgroundColor({ color: "#0d0e11" }).catch(() => {});
+  }
+  // Push groundwork. Off by default: turning it on needs Firebase (Android)
+  // and an APNs key (iOS), see docs/MOBILE.md. The token is kept locally
+  // until the server-side sender exists (v2).
+  if (PushNotifications && window.QD_CONFIG && window.QD_CONFIG.push === true) {
+    PushNotifications.addListener("registration", (token) => {
+      try { localStorage.setItem("qd.push_token", JSON.stringify(token.value)); } catch (_) {}
+    });
+    PushNotifications.requestPermissions().then((r) => {
+      if (r.receive === "granted") PushNotifications.register();
+    }).catch(() => {});
+  }
 }
 
 /** Remove the boot splash once the app has mounted. */

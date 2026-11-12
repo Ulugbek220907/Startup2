@@ -1,0 +1,43 @@
+# cargo-deny configuration (checked in CI).
+#   cargo deny check advisories licenses bans sources
+
+[advisories]
+# Fail on any known vulnerability or unmaintained/yanked crate.
+yanked = "deny"
+
+[licenses]
+# Licences the project accepts for its dependencies. All are permissive or
+# weak-copyleft terms compatible with shipping a closed-source product.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "0BSD",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "MPL-2.0",
+    "CDLA-Permissive-2.0",
+    "OpenSSL",
+    "BSL-1.0",
+]
+confidence-threshold = 0.9
+
+[licenses.private]
+# Our own crates are unpublished and unlicensed.
+ignore = true
+
+[bans]
+# Different versions of one crate are common in a tree this size (e.g. the
+# Telegram library pins its own HTTP client); warn, do not fail.
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+# Only crates.io; no git or alternative registries.
+unknown-registry = "deny"
+unknown-git = "deny"

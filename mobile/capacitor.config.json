@@ -1,0 +1,27 @@
+{
+  "appId": "uz.qiyiqdoppi.app",
+  "appName": "QiyiqDoʻppi",
+  "webDir": "www",
+  "backgroundColor": "#0d0e11",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0d0e11"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 600,
+      "backgroundColor": "#0d0e11",
+      "showSpinner": false
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

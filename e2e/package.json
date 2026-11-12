@@ -1,0 +1,11 @@
+{
+  "name": "qiyiqdoppi-e2e",
+  "private": true,
+  "description": "Browser end-to-end test for the customer and admin journey",
+  "scripts": {
+    "test": "node customer-flow.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

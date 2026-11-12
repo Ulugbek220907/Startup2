@@ -1,0 +1,132 @@
+name: Android
+
+# Pull requests: a debug APK to try on a phone.
+# Version tags (v1.2.3): signed release APK and AAB attached to the GitHub
+# release, and optionally uploaded to the Play Console internal track.
+on:
+  pull_request:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SQLX_OFFLINE: "true"
+  RUST_VERSION: "1.97.0"
+  # Public address of the server the app talks to. Set it as a repository
+  # variable (Settings -> Secrets and variables -> Actions -> Variables).
+  QD_API_BASE: ${{ vars.QD_API_BASE || 'https://qiyiqdoppi.example' }}
+  APP_LINK_HOST: ${{ vars.APP_LINK_HOST || 'qiyiqdoppi.example' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # attach files to the release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: trunk@0.22.1,wasm-bindgen-cli@0.2.130
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Capacitor 8 builds with JDK 21.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Build web assets and sync them into the Android project
+        run: scripts/build-mobile-web.sh
+
+      - name: Version from the tag
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "name=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=0.0.0-dev" >> "$GITHUB_OUTPUT"
+          fi
+          # Play requires a version code that grows with every upload.
+          echo "code=$((GITHUB_RUN_NUMBER + 100))" >> "$GITHUB_OUTPUT"
+
+      - name: Debug APK
+        if: github.ref_type != 'tag'
+        working-directory: mobile/android
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: ./gradlew --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref_type != 'tag'
+        with:
+          name: qiyiqdoppi-debug-apk
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Decode the release keystore
+        if: github.ref_type == 'tag'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set (see docs/SECRETS.md)"; exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+
+      - name: Signed release APK and AAB
+        if: github.ref_type == 'tag'
+        working-directory: mobile/android
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew --no-daemon assembleRelease bundleRelease
+          mkdir -p "$GITHUB_WORKSPACE/release"
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/release/qiyiqdoppi-$VERSION_NAME.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "$GITHUB_WORKSPACE/release/qiyiqdoppi-$VERSION_NAME.aab"
+
+      - name: Remove the keystore from the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Attach to the GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+
+      # Optional: runs only when the Play service account secret exists.
+      - name: Check for Play Console credentials
+        id: play
+        if: github.ref_type == 'tag'
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: echo "enabled=$([ -n "$PLAY_SERVICE_ACCOUNT_JSON" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the AAB to the Play Console internal track
+        if: github.ref_type == 'tag' && steps.play.outputs.enabled == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: uz.qiyiqdoppi.app
+          releaseFiles: release/*.aab
+          track: internal
+          status: draft

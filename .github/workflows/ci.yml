@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Queries are checked against the committed .sqlx metadata, so builds do
+  # not need a database.
+  SQLX_OFFLINE: "true"
+  RUST_VERSION: "1.97.0"
+
+jobs:
+  rust:
+    name: Format, lint, test
+    runs-on: ubuntu-24.04
+    services:
+      # Only for `sqlx prepare --check`; the integration tests start their
+      # own PostgreSQL containers with testcontainers.
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Lint (server side)
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Lint (web, WASM target)
+        run: cargo clippy -p web --target wasm32-unknown-unknown --locked -- -D warnings
+      - name: Tests (unit, property, golden-image, integration with real Postgres)
+        run: cargo test --locked
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli@0.9.0
+      - name: Query metadata is up to date
+        env:
+          DATABASE_URL: postgres://postgres:ci@localhost:5432/postgres
+          SQLX_OFFLINE: "false"
+        run: |
+          sqlx migrate run
+          cargo sqlx prepare --workspace --check
+      - name: Upload golden-image diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-diffs
+          path: crates/renderer/tests/golden/*.actual.png
+          if-no-files-found: ignore
+
+  audit:
+    name: Dependency advisories and licences
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories licenses bans sources
+
+  web:
+    name: Web build and browser end-to-end test
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: trunk@0.22.1,wasm-bindgen-cli@0.2.130
+      - name: Build the web app (fails if the initial payload exceeds 600 KB gzipped)
+        run: scripts/build-web.sh
+      - name: Build the server
+        run: cargo build --locked -p server
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the test browser
+        working-directory: e2e
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Browser end-to-end test
+        env:
+          DATABASE_URL: postgres://postgres:ci@localhost:5432/postgres
+          STATIC_DIR: crates/web/dist
+          STORAGE_BACKEND: fs
+          STORAGE_FS_DIR: ${{ runner.temp }}/storage
+          ADMIN_USERNAME: admin
+          ADMIN_PASSWORD: ci-admin-password
+          ADMIN_PASS: ci-admin-password
+          LOG_FORMAT: pretty
+        run: |
+          target/debug/qiyiq-server > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/readyz && break; sleep 1; done
+          node e2e/customer-flow.js
+      - name: Upload screenshots and server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e
+          path: |
+            e2e/out/*.png
+            server.log
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: crates/web/dist
+          retention-days: 7

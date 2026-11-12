@@ -12,6 +12,8 @@ pub fn mount() {
     crate::platform::register_service_worker();
     crate::platform::remove_boot_splash();
     leptos::mount::mount_to_body(App);
+    // After mounting, so the router is listening when a deep link arrives.
+    crate::platform::init_native();
 }
 
 #[component]

@@ -37,6 +37,8 @@ extern "C" {
 
     #[wasm_bindgen(js_name = registerServiceWorker)]
     pub fn register_service_worker();
+    #[wasm_bindgen(js_name = initNative)]
+    pub fn init_native();
     #[wasm_bindgen(js_name = removeBootSplash)]
     pub fn remove_boot_splash();
 }
