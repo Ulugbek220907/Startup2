@@ -19,7 +19,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-const FINGERPRINT = /-[0-9a-f]{16,}(_bg)?\.[a-z0-9]+$/;
+const FINGERPRINT = /-[0-9a-f]{8,}(_bg)?\.[a-z0-9]+$/;
 
 async function cacheFirst(request) {
   const cache = await caches.open(CACHE);

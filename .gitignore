@@ -16,3 +16,4 @@ mobile/ios/App/Pods/
 mobile/ios/DerivedData/
 eval/out/
 .DS_Store
+e2e/out/

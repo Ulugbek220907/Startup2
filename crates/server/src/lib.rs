@@ -166,7 +166,7 @@ fn is_fingerprinted(path: &str) -> bool {
     let file = path.rsplit('/').next().unwrap_or("");
     let Some((stem, _ext)) = file.rsplit_once('.') else { return false };
     let stem = stem.strip_suffix("_bg").unwrap_or(stem);
-    stem.rsplit_once('-').is_some_and(|(_, h)| h.len() >= 16 && h.bytes().all(|b| b.is_ascii_hexdigit()))
+    stem.rsplit_once('-').is_some_and(|(_, h)| h.len() >= 8 && h.bytes().all(|b| b.is_ascii_hexdigit()))
 }
 
 /// Adds security and caching headers to every response and counts it.

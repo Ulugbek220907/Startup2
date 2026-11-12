@@ -102,7 +102,9 @@ impl Ed {
     }
 
     fn mutate_selected(&self, f: impl FnOnce(&mut Layer)) {
-        let Some(id) = self.selected.get_untracked() else { return };
+        // `try_` variants: this can run from an async task after the editor
+        // was closed, when its signals no longer exist.
+        let Some(id) = self.selected.try_get_untracked().flatten() else { return };
         let side = self.ctx.side.get_untracked();
         self.mutate(|doc| {
             if let Some(l) = doc.layers_mut(side).iter_mut().find(|l| l.id == id) {
@@ -114,7 +116,7 @@ impl Ed {
     /// Record the current document as an undo step and save the draft.
     fn commit(&self) {
         let Some(cur) = self.doc() else { return };
-        self.history.update_value(|h| {
+        let _ = self.history.try_update_value(|h| {
             if h.last.as_ref() == Some(&cur) {
                 return;
             }
@@ -133,7 +135,9 @@ impl Ed {
     }
 
     fn sync_hist(&self) {
-        self.hist_state.set(self.history.with_value(|h| (!h.undo.is_empty(), !h.redo.is_empty())));
+        if let Some(state) = self.history.try_with_value(|h| (!h.undo.is_empty(), !h.redo.is_empty())) {
+            self.hist_state.set(state);
+        }
     }
 
     fn undo(&self) {
@@ -327,6 +331,7 @@ pub fn EditorPage(garment: Option<String>, shared: Option<String>) -> impl IntoV
         busy: RwSignal::new(false),
     };
     let is_shared = shared.is_some();
+    let shared_slug = StoredValue::new(shared.clone());
     let ready = RwSignal::new(false);
     ensure_font(FontId::Montserrat);
 
@@ -669,6 +674,11 @@ pub fn EditorPage(garment: Option<String>, shared: Option<String>) -> impl IntoV
         <main class="page has-bar">
             <Show when=move || is_shared>
                 <div class="note">{move || t("editor.shared_view")}</div>
+                <button class="link-btn" on:click=move |_| {
+                    // Hand the design over to the report form.
+                    state::store_set("qd.report", &shared_slug.get_value().unwrap_or_default());
+                    router.go(Route::Legal);
+                }>{move || t("editor.report")}</button>
             </Show>
             <Show when=move || ready.get() fallback=move || view! { <p class="muted">{move || t("common.loading")}</p> }>
                 <div class="stage">
